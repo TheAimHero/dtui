@@ -32,7 +32,6 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch {
-
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
 
@@ -53,9 +52,14 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.StartContainer):
 			return m.StartContainer()
 
+		case key.Matches(msg, m.keys.StartContainers):
+			return m.StartContainers()
+
+		case key.Matches(msg, m.keys.StopContainers):
+			return m.StopContainers()
+
 		case key.Matches(msg, m.keys.ToggleSelected):
 			return m.SelectContainers()
-
 		}
 	}
 	return m, cmd

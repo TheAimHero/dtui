@@ -17,6 +17,10 @@ const (
 	ContainerStatus
 )
 
+func (m *containerModel) ClearSelectedContainers() {
+	m.selectedContainers = []string{}
+}
+
 func (m containerModel) StartContainer() (tea.Model, tea.Cmd) {
 	err := m.dockerClient.StartContainer(m.table.SelectedRow()[1])
 	if err != nil {
@@ -38,6 +42,7 @@ func (m containerModel) StopContainer() (tea.Model, tea.Cmd) {
 }
 
 func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
+	defer m.ClearSelectedContainers()
 	errors := make([]string, 0)
 	for _, containerID := range m.selectedContainers {
 		err := m.dockerClient.StartContainer(containerID)
@@ -46,10 +51,30 @@ func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
 		}
 	}
 	if len(errors) > 0 {
-		m.message.AddMessage(strings.Join(errors, "\n"), ui.ErrorMessage)
+		m.message.AddMessage("Error while starting some containers", ui.ErrorMessage)
+		m.selectedContainers = []string{}
 		return m, m.message.ClearMessage(errorDuration)
 	}
 	m.message.AddMessage("Containers started", ui.SuccessMessage)
+	m.selectedContainers = []string{}
+	return m, m.message.ClearMessage(successDuration)
+}
+
+func (m containerModel) StopContainers() (tea.Model, tea.Cmd) {
+	errors := make([]string, 0)
+	for _, containerID := range m.selectedContainers {
+		err := m.dockerClient.StopContainer(containerID)
+		if err != nil {
+			errors = append(errors, err.Error())
+		}
+	}
+	if len(errors) > 0 {
+		m.message.AddMessage("Error while stopping some containers", ui.ErrorMessage)
+	m.selectedContainers = []string{}
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	m.message.AddMessage("Containers stopped", ui.SuccessMessage)
+	m.selectedContainers = []string{}
 	return m, m.message.ClearMessage(successDuration)
 }
 
@@ -59,7 +84,7 @@ func (m containerModel) SelectContainers() (tea.Model, tea.Cmd) {
 		m.selectedContainers = helpers.RemoveFromArray(containerID, m.selectedContainers)
 	} else {
 		m.selectedContainers = append(m.selectedContainers, containerID)
-
 	}
+  m.table.MoveDown(1)
 	return m, nil
 }

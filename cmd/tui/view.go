@@ -20,13 +20,13 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "1":
 			m.ActiveTab = ContainerTab
-			return m, nil
+			return m, m.Tabs[m.ActiveTab].Init()
 		case "2":
 			m.ActiveTab = ImageTab
-			return m, nil
+			return m, m.Tabs[m.ActiveTab].Init()
 		case "3":
 			m.ActiveTab = WipTab
-			return m, nil
+			return m, m.Tabs[m.ActiveTab].Init()
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}

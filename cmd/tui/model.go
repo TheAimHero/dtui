@@ -15,7 +15,7 @@ type MainModel struct {
 func (m MainModel) Init() tea.Cmd {
 	batch := []tea.Cmd{}
 	for _, t := range m.Tabs {
-    batch = append(batch, t.Init())
+		batch = append(batch, t.Init())
 	}
 	return tea.Batch(batch...)
 }
