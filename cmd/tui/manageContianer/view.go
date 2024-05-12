@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui"
 	"github.com/charmbracelet/bubbles/key"
@@ -19,6 +20,12 @@ var (
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+
+	case time.Time:
+		m.dockerClient.FetchContainers()
+		tableRows := getTableRows(m.dockerClient.Containers)
+		m.table.SetRows(tableRows)
+		return m, tickCommand()
 
 	case tea.KeyMsg:
 		switch {
@@ -44,8 +51,6 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.message.AddMessage(fmt.Sprintf("Container %s stopped", m.table.SelectedRow()[1]), "success")
-			m.dockerClient.FetchContainers()
-			m.table = getTable(m.dockerClient.Containers)
 			return m, nil
 
 		case key.Matches(msg, m.keys.StartContainer):
@@ -55,8 +60,6 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 			m.message.AddMessage(fmt.Sprintf("Container %s started", m.table.SelectedRow()[1]), "success")
-			m.dockerClient.FetchContainers()
-			m.table = getTable(m.dockerClient.Containers)
 			return m, nil
 		}
 	}

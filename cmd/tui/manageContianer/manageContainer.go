@@ -20,7 +20,7 @@ type containerModel struct {
 }
 
 func (m containerModel) Init() tea.Cmd {
-	return nil
+	return tickCommand()
 }
 
 func getTable(containers docker.Containers) table.Model {
