@@ -18,7 +18,7 @@ func NewTable(tableColumns []table.Column, tableRows []table.Row) table.Model {
 		table.WithColumns(tableColumns),
 		table.WithRows(tableRows),
 		table.WithFocused(true),
-		table.WithHeight(len(tableRows)+10),
+		table.WithHeight(10),
 	)
 
 	s := table.DefaultStyles()

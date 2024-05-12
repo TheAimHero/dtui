@@ -18,6 +18,14 @@ var (
 	successDuration                  = 2 * time.Second
 )
 
+func heightPadding(doc strings.Builder) int {
+	paddingHeight := physicalHeight - lipgloss.Height(doc.String()) - 7
+	if paddingHeight < 0 {
+		paddingHeight = 0
+	}
+	return paddingHeight
+}
+
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
@@ -79,5 +87,6 @@ func (m containerModel) View() string {
 	align := lipgloss.NewStyle().Align(lipgloss.NoTabConversion)
 	doc.WriteString(align.Render(ui.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage()))
 	doc.WriteString("\n" + m.help.View(m.keys))
+	doc.WriteString(strings.Repeat("\n", heightPadding(doc)))
 	return doc.String()
 }

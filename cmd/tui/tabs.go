@@ -40,7 +40,7 @@ var (
 		BottomRight: " ",
 	}
 	inactiveTabBorder = lipgloss.NewStyle().Border(lipgloss.NormalBorder())
-	docStyle          = lipgloss.NewStyle().Padding(2, 0, 1, 0)
+	docStyle          = lipgloss.NewStyle().Padding(0, 0, 0, 0)
 	highlightColor    = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	inactiveTabStyle  = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(highlightColor)
 	padTabStyle       = inactiveTabBorder.Copy().BorderTop(false).BorderRight(false).BorderLeft(false).BorderForeground(highlightColor)
