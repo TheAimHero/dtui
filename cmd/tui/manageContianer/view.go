@@ -1,7 +1,6 @@
 package managecontianer
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -27,7 +26,7 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case time.Time:
 		m.dockerClient.FetchContainers()
-		tableRows := getTableRows(m.dockerClient.Containers)
+		tableRows := getTableRows(m.dockerClient.Containers, m.selectedContainers)
 		m.table.SetRows(tableRows)
 		return m, tickCommand()
 
@@ -49,22 +48,14 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = !m.help.ShowAll
 
 		case key.Matches(msg, m.keys.StopContainer):
-			err := m.dockerClient.StopContainer(m.table.SelectedRow()[1])
-			if err != nil {
-				m.message.AddMessage(fmt.Sprintf("Error while stopping container: %s", strings.Split(err.Error(), ":")[1]), "error")
-				return m, m.message.ClearMessage(errorDuration)
-			}
-			m.message.AddMessage(fmt.Sprintf("Container %s stopped", m.table.SelectedRow()[1]), "success")
-			return m, m.message.ClearMessage(successDuration)
+			return m.StopContainer()
 
 		case key.Matches(msg, m.keys.StartContainer):
-			err := m.dockerClient.StartContainer(m.table.SelectedRow()[1])
-			if err != nil {
-				m.message.AddMessage(fmt.Sprintf("Error while starting container: %s", strings.Split(err.Error(), ":")[1]), "error")
-				return m, m.message.ClearMessage(errorDuration)
-			}
-			m.message.AddMessage(fmt.Sprintf("Container %s started", m.table.SelectedRow()[1]), "success")
-			return m, m.message.ClearMessage(successDuration)
+			return m.StartContainer()
+
+		case key.Matches(msg, m.keys.ToggleSelected):
+			return m.SelectContainers()
+
 		}
 	}
 	return m, cmd

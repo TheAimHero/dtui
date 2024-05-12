@@ -26,3 +26,16 @@ func (m *DockerClient) StartContainer(containerID string) error {
 	err := m.client.ContainerStart(ctx, containerID, container.StartOptions{})
 	return err
 }
+
+func (m *DockerClient) StartContainers(containerIDs []string) []string {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	errors := make([]string, 0)
+	defer cancel()
+	for _, containerID := range containerIDs {
+		err := m.client.ContainerStart(ctx, containerID, container.StartOptions{})
+		if err != nil {
+			errors = append(errors, err.Error())
+		}
+	}
+	return errors
+}

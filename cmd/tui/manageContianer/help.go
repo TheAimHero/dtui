@@ -13,12 +13,15 @@ var (
 )
 
 type keyMap struct {
-	Up             key.Binding
-	Down           key.Binding
-	Help           key.Binding
-	Quit           key.Binding
-	StartContainer key.Binding
-	StopContainer  key.Binding
+	Up              key.Binding
+	Down            key.Binding
+	Help            key.Binding
+	Quit            key.Binding
+	StartContainer  key.Binding
+	StopContainer   key.Binding
+	StartContainers key.Binding
+	StopContainers  key.Binding
+	ToggleSelected  key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -30,6 +33,8 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Up, k.Down},
 		{k.Help, k.Quit},
 		{k.StartContainer, k.StopContainer},
+		{k.StartContainers, k.StopContainers},
+		{k.ToggleSelected},
 	}
 }
 
@@ -57,6 +62,18 @@ var keys = keyMap{
 	StopContainer: key.NewBinding(
 		key.WithKeys("p"),
 		key.WithHelp("p", "stop container"),
+	),
+	StartContainers: key.NewBinding(
+		key.WithKeys("S"),
+		key.WithHelp("S", "start selected containers"),
+	),
+	StopContainers: key.NewBinding(
+		key.WithKeys("P"),
+		key.WithHelp("P", "stop selected containers"),
+	),
+	ToggleSelected: key.NewBinding(
+		key.WithKeys(" "),
+		key.WithHelp("space", "toggle selected"),
 	),
 }
 

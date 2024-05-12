@@ -20,8 +20,7 @@ type imageModel struct {
 }
 
 func (m imageModel) Init() tea.Cmd {
-	batchCmd := make([]tea.Cmd, 1)
-	batchCmd[1] = tickCommand()
+	batchCmd := []tea.Cmd{tickCommand()}
 	return tea.Sequence(batchCmd...)
 }
 
@@ -40,7 +39,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		keys:         keys,
 	}
 	if err != nil {
-		m.message.AddMessage("Error while fetching images", "error")
+		m.message.AddMessage("Error while fetching images", ui.ErrorMessage)
 		m.message.ClearMessage(2 * time.Second)
 	}
 	return m

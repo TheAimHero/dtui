@@ -8,9 +8,14 @@ import (
 )
 
 type Message struct {
-	msgType string
 	value   string
+	msgType int
 }
+
+const (
+	ErrorMessage = iota
+	SuccessMessage
+)
 
 type ClearErrorMsg struct{}
 
@@ -20,16 +25,16 @@ var (
 	successStyle = msgStyle.Copy().Foreground(lipgloss.Color("#AADB1E"))
 )
 
-func (msg *Message) AddMessage(value string, messageType string) {
+func (msg *Message) AddMessage(value string, messageType int) {
 	msg.msgType = messageType
 	msg.value = value
 }
 
 func (msg *Message) ShowMessage() string {
 	switch msg.msgType {
-	case "error":
+	case ErrorMessage:
 		return errStyle.Render(msg.value)
-	case "success":
+	case SuccessMessage:
 		return successStyle.Render(msg.value)
 	}
 

@@ -19,9 +19,10 @@ func Init() error {
 	model := MainModel{
 		TabsTitle: []string{"Manage Container", "Manage Images", "Work In Progress"},
 		Tabs:      []tea.Model{containerModel, imageModel, wipModel},
+		ActiveTab: 0,
 	}
-	p := tea.NewProgram(model, tea.WithAltScreen())
-	// p := tea.NewProgram(model)
+	// p := tea.NewProgram(model, tea.WithAltScreen())
+	p := tea.NewProgram(model)
 	_, err = p.Run()
 	if err != nil {
 		return err

@@ -13,9 +13,9 @@ type MainModel struct {
 }
 
 func (m MainModel) Init() tea.Cmd {
-	batch := make([]tea.Cmd, len(m.Tabs))
-	for i := range m.Tabs {
-		batch[i] = m.Tabs[i].Init()
+	batch := []tea.Cmd{}
+	for _, t := range m.Tabs {
+    batch = append(batch, t.Init())
 	}
 	return tea.Batch(batch...)
 }
