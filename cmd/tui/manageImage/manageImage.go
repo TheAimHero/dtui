@@ -1,11 +1,14 @@
 package manageimage
 
 import (
-	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/ui"
+	"time"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/TheAimHero/dtui/internal/docker"
+	"github.com/TheAimHero/dtui/internal/ui"
 )
 
 type imageModel struct {
@@ -17,7 +20,9 @@ type imageModel struct {
 }
 
 func (m imageModel) Init() tea.Cmd {
-	return nil
+	batchCmd := make([]tea.Cmd, 1)
+	batchCmd[1] = tickCommand()
+	return tea.Sequence(batchCmd...)
 }
 
 func getTable(images docker.Images) table.Model {
@@ -36,6 +41,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 	}
 	if err != nil {
 		m.message.AddMessage("Error while fetching images", "error")
+		m.message.ClearMessage(2 * time.Second)
 	}
 	return m
 }

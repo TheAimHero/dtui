@@ -37,6 +37,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 	}
 	if err != nil {
 		m.message.AddMessage("Error while fetching containers", "error")
+		m.message.ClearMessage(successDuration)
 	}
 	return m
 }

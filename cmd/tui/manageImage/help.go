@@ -13,10 +13,10 @@ var (
 )
 
 type keyMap struct {
-	Up             key.Binding
-	Down           key.Binding
-	Help           key.Binding
-	Quit           key.Binding
+	Up   key.Binding
+	Down key.Binding
+	Help key.Binding
+	Quit key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {

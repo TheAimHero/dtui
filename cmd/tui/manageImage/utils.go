@@ -1,11 +1,14 @@
 package manageimage
 
 import (
+	"fmt"
 	"time"
+
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/size"
-	"github.com/charmbracelet/bubbles/table"
 )
 
 func getTableRows(images docker.Images) []table.Row {
@@ -16,17 +19,25 @@ func getTableRows(images docker.Images) []table.Row {
 			image.RepoTags[0],
 			time.Unix(image.Created, 0).Format("02/01/2006 15:04 MST"),
 			size.GetSize(image.Size),
+			fmt.Sprintf("%d", image.Containers),
 		}
 	}
 	return tableRows
 }
 
 func getTableColumns() []table.Column {
-	width := (physicalWidth / 4) - 4
+	width := (physicalWidth / 5) - 4
 	return []table.Column{
 		{Title: "ID", Width: width},
 		{Title: "Name", Width: width},
 		{Title: "Created", Width: width},
 		{Title: "Size", Width: width},
+		{Title: "Containers", Width: width},
 	}
+}
+
+func tickCommand() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+		return t
+	})
 }

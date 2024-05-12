@@ -1,11 +1,18 @@
 package ui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
 
 type Message struct {
 	msgType string
 	value   string
 }
+
+type ClearErrorMsg struct{}
 
 var (
 	msgStyle     = lipgloss.NewStyle().Padding(1, 0)
@@ -25,5 +32,12 @@ func (msg *Message) ShowMessage() string {
 	case "success":
 		return successStyle.Render(msg.value)
 	}
+
 	return msgStyle.Render("")
+}
+
+func (msg Message) ClearMessage(t time.Duration) tea.Cmd {
+	return tea.Tick(t, func(_ time.Time) tea.Msg {
+		return ClearErrorMsg{}
+	})
 }

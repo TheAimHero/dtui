@@ -15,11 +15,15 @@ import (
 
 var (
 	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+	errorDuration                    = 5 * time.Second
+	successDuration                  = 2 * time.Second
 )
 
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case ui.ClearErrorMsg:
+		m.message = ui.Message{}
 
 	case time.Time:
 		m.dockerClient.FetchContainers()
@@ -48,19 +52,19 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			err := m.dockerClient.StopContainer(m.table.SelectedRow()[1])
 			if err != nil {
 				m.message.AddMessage(fmt.Sprintf("Error while stopping container: %s", strings.Split(err.Error(), ":")[1]), "error")
-				return m, nil
+				return m, m.message.ClearMessage(errorDuration)
 			}
 			m.message.AddMessage(fmt.Sprintf("Container %s stopped", m.table.SelectedRow()[1]), "success")
-			return m, nil
+			return m, m.message.ClearMessage(successDuration)
 
 		case key.Matches(msg, m.keys.StartContainer):
 			err := m.dockerClient.StartContainer(m.table.SelectedRow()[1])
 			if err != nil {
 				m.message.AddMessage(fmt.Sprintf("Error while starting container: %s", strings.Split(err.Error(), ":")[1]), "error")
-				return m, nil
+				return m, m.message.ClearMessage(errorDuration)
 			}
 			m.message.AddMessage(fmt.Sprintf("Container %s started", m.table.SelectedRow()[1]), "success")
-			return m, nil
+			return m, m.message.ClearMessage(successDuration)
 		}
 	}
 	return m, cmd

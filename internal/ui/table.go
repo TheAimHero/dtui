@@ -7,9 +7,10 @@ import (
 
 var (
 	highlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	BaseTableStyle      = lipgloss.NewStyle().
+	BaseTableStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(highlightColor).Padding(1, 1)
+			BorderForeground(highlightColor).
+			Padding(1, 1)
 )
 
 func NewTable(tableColumns []table.Column, tableRows []table.Row) table.Model {
