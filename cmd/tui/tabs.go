@@ -81,8 +81,6 @@ func Tab(m MainModel) string {
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, paddingBorder)
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, tabEndStyle.Render(" "))
 	doc.WriteString(row)
-	// paddingHeight := physicalHeight - lipgloss.Height(row) -
-	// windowStyle = windowStyle.Padding(2, 0, paddingHeight, 0)
 	doc.WriteString(windowStyle.Width((physicalWidth - windowStyle.GetHorizontalFrameSize())).Render(m.Tabs[m.ActiveTab].View()))
 	return docStyle.Render(doc.String())
 }

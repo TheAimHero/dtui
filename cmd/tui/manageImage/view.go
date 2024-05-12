@@ -17,7 +17,7 @@ var (
 func (m imageModel) View() string {
 	doc := strings.Builder{}
 	doc.WriteString(ui.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage())
-	doc.WriteString(m.help.View(m.keys))
+	doc.WriteString("\n" + m.help.View(m.keys))
 	return doc.String()
 }
 
