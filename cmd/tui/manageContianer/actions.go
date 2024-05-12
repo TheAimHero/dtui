@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TheAimHero/dtui/internal/helpers"
 	"github.com/TheAimHero/dtui/internal/ui"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -18,11 +17,11 @@ const (
 )
 
 func (m *containerModel) ClearSelectedContainers() {
-	m.selectedContainers = []string{}
+	m.selectedContainers.Clear()
 }
 
 func (m containerModel) StartContainer() (tea.Model, tea.Cmd) {
-	err := m.dockerClient.StartContainer(m.table.SelectedRow()[1])
+	err := m.dockerClient.StartContainer(m.table.SelectedRow()[ContainerID])
 	if err != nil {
 		m.message.AddMessage(fmt.Sprintf("Error while starting container: %s", strings.Split(err.Error(), ":")[ContainerName]), ui.ErrorMessage)
 		return m, m.message.ClearMessage(errorDuration)
@@ -44,7 +43,7 @@ func (m containerModel) StopContainer() (tea.Model, tea.Cmd) {
 func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
 	defer m.ClearSelectedContainers()
 	errors := make([]string, 0)
-	for _, containerID := range m.selectedContainers {
+	for _, containerID := range m.selectedContainers.ToSlice() {
 		err := m.dockerClient.StartContainer(containerID)
 		if err != nil {
 			errors = append(errors, err.Error())
@@ -52,17 +51,17 @@ func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
 	}
 	if len(errors) > 0 {
 		m.message.AddMessage("Error while starting some containers", ui.ErrorMessage)
-		m.selectedContainers = []string{}
+		m.selectedContainers.Clear()
 		return m, m.message.ClearMessage(errorDuration)
 	}
 	m.message.AddMessage("Containers started", ui.SuccessMessage)
-	m.selectedContainers = []string{}
+	m.selectedContainers.Clear()
 	return m, m.message.ClearMessage(successDuration)
 }
 
 func (m containerModel) StopContainers() (tea.Model, tea.Cmd) {
 	errors := make([]string, 0)
-	for _, containerID := range m.selectedContainers {
+	for _, containerID := range m.selectedContainers.ToSlice() {
 		err := m.dockerClient.StopContainer(containerID)
 		if err != nil {
 			errors = append(errors, err.Error())
@@ -70,21 +69,35 @@ func (m containerModel) StopContainers() (tea.Model, tea.Cmd) {
 	}
 	if len(errors) > 0 {
 		m.message.AddMessage("Error while stopping some containers", ui.ErrorMessage)
-	m.selectedContainers = []string{}
+		m.selectedContainers.Clear()
 		return m, m.message.ClearMessage(errorDuration)
 	}
 	m.message.AddMessage("Containers stopped", ui.SuccessMessage)
-	m.selectedContainers = []string{}
+	m.selectedContainers.Clear()
 	return m, m.message.ClearMessage(successDuration)
 }
 
 func (m containerModel) SelectContainers() (tea.Model, tea.Cmd) {
 	containerID := m.table.SelectedRow()[ContainerID]
-	if helpers.InArray(containerID, m.selectedContainers) {
-		m.selectedContainers = helpers.RemoveFromArray(containerID, m.selectedContainers)
+	if m.selectedContainers.Contains(containerID) {
+		m.selectedContainers.Remove(containerID)
 	} else {
-		m.selectedContainers = append(m.selectedContainers, containerID)
+		m.selectedContainers.Add(containerID)
 	}
-  m.table.MoveDown(1)
+	m.table.MoveDown(1)
+	return m, nil
+}
+
+func (m containerModel) SelectAllContainers() (tea.Model, tea.Cmd) {
+	var allIDs []string
+	for _, row := range m.table.Rows() {
+		allIDs = append(allIDs, row[ContainerID])
+	}
+	if m.selectedContainers.Cardinality() == len(m.table.Rows()) {
+		m.selectedContainers.Clear()
+	} else {
+		m.selectedContainers.Clear()
+		m.selectedContainers.Append(allIDs...)
+	}
 	return m, nil
 }

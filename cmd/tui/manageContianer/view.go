@@ -21,6 +21,11 @@ var (
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+		m.table = getTable(m.dockerClient.Containers, m.selectedContainers)
+		return m, cmd
+
 	case ui.ClearErrorMsg:
 		m.message = ui.Message{}
 
@@ -60,7 +65,11 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.ToggleSelected):
 			return m.SelectContainers()
+
+		case key.Matches(msg, m.keys.ToggleSelectAll):
+			return m.SelectAllContainers()
 		}
+
 	}
 	return m, cmd
 }

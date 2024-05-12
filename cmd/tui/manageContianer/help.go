@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	descStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1FA8C"))
+	descStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1FA8C")).Align(lipgloss.Left, lipgloss.Center).Padding(0, 2)
 	ellipsisStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#6272a4"))
-	keyStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("#BD93F9"))
+	keyStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("#BD93F9")).Align(lipgloss.Left, lipgloss.Center)
 )
 
 type keyMap struct {
@@ -22,6 +22,7 @@ type keyMap struct {
 	StartContainers key.Binding
 	StopContainers  key.Binding
 	ToggleSelected  key.Binding
+	ToggleSelectAll key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -34,7 +35,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Help, k.Quit},
 		{k.StartContainer, k.StopContainer},
 		{k.StartContainers, k.StopContainers},
-		{k.ToggleSelected},
+		{k.ToggleSelected, k.ToggleSelectAll},
 	}
 }
 
@@ -74,6 +75,10 @@ var keys = keyMap{
 	ToggleSelected: key.NewBinding(
 		key.WithKeys(" "),
 		key.WithHelp("space", "toggle selected"),
+	),
+	ToggleSelectAll: key.NewBinding(
+		key.WithKeys("V"),
+		key.WithHelp("V", "toggle select all"),
 	),
 }
 

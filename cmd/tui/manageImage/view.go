@@ -31,6 +31,10 @@ func (m imageModel) View() string {
 func (m imageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+		m.table = getTable(m.dockerClient.Images)
+
 	case ui.ClearErrorMsg:
 		m.message = ui.Message{}
 

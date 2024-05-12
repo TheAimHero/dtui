@@ -6,6 +6,7 @@ require (
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.26.1
 	github.com/charmbracelet/lipgloss v0.10.0
+	github.com/deckarep/golang-set/v2 v2.6.0
 	github.com/docker/docker v26.1.1+incompatible
 	golang.org/x/term v0.19.0
 )

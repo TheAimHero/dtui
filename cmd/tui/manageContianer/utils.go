@@ -5,16 +5,16 @@ import (
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/helpers"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
-func getTableRows(containers docker.Containers, selectedRows []string) []table.Row {
+func getTableRows(containers docker.Containers, selectedRows mapset.Set[string]) []table.Row {
 	tableRows := make([]table.Row, len(containers))
 	for i, container := range containers {
 		var selected string
-		if helpers.InArray(container.ID, selectedRows) {
+		if selectedRows.Contains(container.ID) {
 			selected = " "
 		} else {
 			selected = "  "
