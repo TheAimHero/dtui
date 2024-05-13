@@ -7,6 +7,7 @@ import (
 const (
 	ContainerTab = iota
 	ImageTab
+	LogsTab
 	WipTab
 )
 
@@ -15,6 +16,7 @@ func (m MainModel) View() string {
 }
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -25,11 +27,17 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ActiveTab = ImageTab
 			return m, m.Tabs[m.ActiveTab].Init()
 		case "3":
+			m.ActiveTab =LogsTab 
+			return m, m.Tabs[m.ActiveTab].Init()
+		case "4":
 			m.ActiveTab = WipTab
 			return m, m.Tabs[m.ActiveTab].Init()
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		}
+	case tea.WindowSizeMsg:
+		m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(msg)
+		return m, cmd
 	}
 	activeTab := m.Tabs[m.ActiveTab]
 	updatedTab, cmd := activeTab.Update(msg)

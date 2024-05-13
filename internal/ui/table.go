@@ -6,10 +6,10 @@ import (
 )
 
 var (
-	highlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	BaseTableStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(highlightColor).
+			BorderForeground(HighlightColor).
 			Padding(1, 1)
 )
 

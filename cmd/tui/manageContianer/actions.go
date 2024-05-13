@@ -101,3 +101,31 @@ func (m containerModel) SelectAllContainers() (tea.Model, tea.Cmd) {
 	}
 	return m, nil
 }
+
+func (m containerModel) DeleteContainer() (tea.Model, tea.Cmd) {
+	err := m.dockerClient.DeleteContainer(m.table.SelectedRow()[ContainerID])
+	if err != nil {
+		m.message.AddMessage(fmt.Sprintf("Error while deleting container: %s", strings.Split(err.Error(), ":")[ContainerName]), ui.ErrorMessage)
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	m.message.AddMessage(fmt.Sprintf("Container %s deleted", m.table.SelectedRow()[ContainerName]), ui.SuccessMessage)
+	return m, m.message.ClearMessage(successDuration)
+}
+
+func (m containerModel) DeleteContainers() (tea.Model, tea.Cmd) {
+	errors := make([]string, 0)
+	for _, containerID := range m.selectedContainers.ToSlice() {
+		err := m.dockerClient.DeleteContainer(containerID)
+		if err != nil {
+			errors = append(errors, err.Error())
+		}
+	}
+	if len(errors) > 0 {
+		m.message.AddMessage("Error while deleting some containers", ui.ErrorMessage)
+		m.selectedContainers.Clear()
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	m.message.AddMessage("Containers deleted", ui.SuccessMessage)
+	m.selectedContainers.Clear()
+	return m, m.message.ClearMessage(successDuration)
+}

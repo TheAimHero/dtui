@@ -11,6 +11,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 var (
@@ -53,7 +54,7 @@ func (m imageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dockerClient.FetchImages()
 		tableRows := getTableRows(m.dockerClient.Images, m.selectedImages)
 		m.table.SetRows(tableRows)
-		return m, tickCommand()
+    return m, utils.TickCommand()
 
 	case tea.KeyMsg:
 		switch {

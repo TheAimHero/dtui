@@ -3,7 +3,7 @@ package main
 import "github.com/TheAimHero/dtui/cmd/tui"
 
 func main() {
-	err := tui.Init()
+	err := tui.NewTui()
 	if err != nil {
 		panic(err)
 	}

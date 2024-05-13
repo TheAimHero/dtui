@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -41,7 +42,7 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.dockerClient.FetchContainers()
 		tableRows := getTableRows(m.dockerClient.Containers, m.selectedContainers)
 		m.table.SetRows(tableRows)
-		return m, tickCommand()
+		return m, utils.TickCommand()
 
 	case tea.KeyMsg:
 		switch {
@@ -54,7 +55,7 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Up):
 			m.table.MoveUp(1)
-			return m, nil
+			return m, cmd
 
 		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
@@ -76,6 +77,12 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.ToggleSelectAll):
 			return m.SelectAllContainers()
+
+		case key.Matches(msg, m.keys.DeleteContainer):
+			return m.DeleteContainer()
+
+		case key.Matches(msg, m.keys.DeleteContainers):
+			return m.DeleteContainers()
 		}
 
 	}
@@ -86,6 +93,11 @@ func (m containerModel) View() string {
 	doc := strings.Builder{}
 	align := lipgloss.NewStyle().Align(lipgloss.NoTabConversion)
 	doc.WriteString(align.Render(ui.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage()))
+	if m.log != nil {
+		doc.WriteString(m.log.View())
+	} else {
+		doc.WriteString(strings.Repeat("\n", 20))
+	}
 	doc.WriteString("\n" + m.help.View(m.keys))
 	doc.WriteString(strings.Repeat("\n", heightPadding(doc)))
 	return doc.String()

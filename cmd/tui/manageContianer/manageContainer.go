@@ -8,19 +8,21 @@ import (
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 type containerModel struct {
+	selectedContainers mapset.Set[string]
 	help               help.Model
-	message            ui.Message
 	keys               keyMap
 	dockerClient       docker.DockerClient
-	selectedContainers mapset.Set[string]
+	message            ui.Message
+	log                tea.Model
 	table              table.Model
 }
 
 func (m containerModel) Init() tea.Cmd {
-	return tickCommand()
+	return tea.Batch(utils.TickCommand())
 }
 
 func getTable(containers docker.Containers, selectedRows mapset.Set[string]) table.Model {
@@ -31,10 +33,12 @@ func getTable(containers docker.Containers, selectedRows mapset.Set[string]) tab
 
 func NewModel(dockerClient docker.DockerClient) tea.Model {
 	err := dockerClient.FetchContainers()
+	table := getTable(dockerClient.Containers, mapset.NewSet[string]())
+	help := getHelpSection()
 	m := containerModel{
 		dockerClient:       dockerClient,
-		table:              getTable(dockerClient.Containers, mapset.NewSet[string]()),
-		help:               getHelpSection(),
+		table:              table,
+		help:               help,
 		selectedContainers: mapset.NewSet[string](),
 		message:            ui.Message{},
 		keys:               keys,

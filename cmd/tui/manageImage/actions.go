@@ -36,6 +36,9 @@ func (m imageModel) DeleteImages() (tea.Model, tea.Cmd) {
 }
 
 func (m imageModel) SelectImage() (tea.Model, tea.Cmd) {
+	if len(m.table.Rows()) == 0 {
+		return m, nil
+	}
 	imageID := m.table.SelectedRow()[ImageID]
 	if m.selectedImages.Contains(imageID) {
 		m.selectedImages.Remove(imageID)

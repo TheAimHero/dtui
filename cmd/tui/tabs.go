@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/TheAimHero/dtui/internal/ui"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
@@ -41,12 +42,11 @@ var (
 	}
 	inactiveTabBorder = lipgloss.NewStyle().Border(lipgloss.NormalBorder())
 	docStyle          = lipgloss.NewStyle().Padding(0, 0, 0, 0)
-	highlightColor    = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	inactiveTabStyle  = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(highlightColor)
-	padTabStyle       = inactiveTabBorder.Copy().BorderTop(false).BorderRight(false).BorderLeft(false).BorderForeground(highlightColor)
-	tabEndStyle       = lipgloss.NewStyle().Border(endTabBorder, false, false, true, false).BorderForeground(highlightColor)
+	inactiveTabStyle  = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui.HighlightColor)
+	padTabStyle       = lipgloss.NewStyle().Foreground(ui.HighlightColor)
+	tabEndStyle       = lipgloss.NewStyle().Border(endTabBorder, false, false, true, false).BorderForeground(ui.HighlightColor)
 	activeTabStyle    = inactiveTabStyle.Copy().Border(activeTabBorder, true)
-	windowStyle       = lipgloss.NewStyle().BorderForeground(highlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop().Padding(2, 0)
+	windowStyle       = lipgloss.NewStyle().BorderForeground(ui.HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop().Padding(2, 0)
 )
 
 func Tab(m MainModel) string {
@@ -77,9 +77,8 @@ func Tab(m MainModel) string {
 		renderedTabs = append(renderedTabs, style.Render(m.TabsTitle[i]))
 	}
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
-	paddingBorder := padTabStyle.Render(strings.Repeat(" ", physicalWidth-lipgloss.Width(row)-1))
+	paddingBorder := padTabStyle.Render(strings.Repeat("─", physicalWidth-lipgloss.Width(row)-1) + "┐")
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, paddingBorder)
-	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, tabEndStyle.Render(" "))
 	doc.WriteString(row)
 	doc.WriteString(windowStyle.Width((physicalWidth - windowStyle.GetHorizontalFrameSize())).Render(m.Tabs[m.ActiveTab].View()))
 	return docStyle.Render(doc.String())

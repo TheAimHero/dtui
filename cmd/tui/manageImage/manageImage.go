@@ -10,6 +10,7 @@ import (
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 type imageModel struct {
@@ -22,8 +23,7 @@ type imageModel struct {
 }
 
 func (m imageModel) Init() tea.Cmd {
-	batchCmd := []tea.Cmd{tickCommand()}
-	return tea.Sequence(batchCmd...)
+	return utils.TickCommand()
 }
 
 func getTable(images docker.Images, selectedImages mapset.Set[string]) table.Model {

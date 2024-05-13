@@ -1,4 +1,4 @@
-package managecontianer
+package logs
 
 import (
 	"github.com/charmbracelet/bubbles/help"
@@ -13,18 +13,13 @@ var (
 )
 
 type keyMap struct {
-	Up               key.Binding
-	Down             key.Binding
-	Help             key.Binding
-	Quit             key.Binding
-	StartContainer   key.Binding
-	StopContainer    key.Binding
-	StartContainers  key.Binding
-	StopContainers   key.Binding
-	DeleteContainer  key.Binding
-	DeleteContainers key.Binding
-	ToggleSelected   key.Binding
-	ToggleSelectAll  key.Binding
+	Up       key.Binding
+	Down     key.Binding
+	Help     key.Binding
+	Quit     key.Binding
+	LogsDown key.Binding
+	LogsUp   key.Binding
+	Select   key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -35,10 +30,8 @@ func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down},
 		{k.Help, k.Quit},
-		{k.StartContainer, k.StopContainer},
-		{k.StartContainers, k.StopContainers},
-		{k.DeleteContainer, k.DeleteContainers},
-		{k.ToggleSelected, k.ToggleSelectAll},
+		{k.LogsUp, k.LogsDown},
+		{k.Select},
 	}
 }
 
@@ -59,37 +52,17 @@ var keys = keyMap{
 		key.WithKeys("q", "esc", "ctrl+c"),
 		key.WithHelp("q", "quit"),
 	),
-	StartContainer: key.NewBinding(
-		key.WithKeys("s"),
-		key.WithHelp("s", "start container"),
+	LogsUp: key.NewBinding(
+		key.WithKeys("c-u"),
+		key.WithHelp("c-u", "scroll up"),
 	),
-	StopContainer: key.NewBinding(
-		key.WithKeys("p"),
-		key.WithHelp("p", "stop container"),
+	LogsDown: key.NewBinding(
+		key.WithKeys("c-d"),
+		key.WithHelp("c-d", "scroll down"),
 	),
-	StartContainers: key.NewBinding(
-		key.WithKeys("S"),
-		key.WithHelp("S", "start selected containers"),
-	),
-	StopContainers: key.NewBinding(
-		key.WithKeys("P"),
-		key.WithHelp("P", "stop selected containers"),
-	),
-	DeleteContainer: key.NewBinding(
-		key.WithKeys("d"),
-		key.WithHelp("d", "delete container"),
-	),
-	DeleteContainers: key.NewBinding(
-		key.WithKeys("D"),
-		key.WithHelp("D", "delete selected containers"),
-	),
-	ToggleSelected: key.NewBinding(
-		key.WithKeys(" "),
-		key.WithHelp("space", "toggle selected"),
-	),
-	ToggleSelectAll: key.NewBinding(
-		key.WithKeys("V"),
-		key.WithHelp("V", "toggle select all"),
+	Select: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "select log"),
 	),
 }
 

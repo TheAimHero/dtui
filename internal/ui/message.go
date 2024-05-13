@@ -17,6 +17,11 @@ const (
 	SuccessMessage
 )
 
+const (
+  ErrorDuration = 5 * time.Second
+  SuccessDuration = 2 * time.Second
+)
+
 type ClearErrorMsg struct{}
 
 var (
