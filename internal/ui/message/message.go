@@ -8,8 +8,8 @@ import (
 )
 
 type Message struct {
-	value   string
-	msgType int
+	Value   string
+	MsgType int
 }
 
 const (
@@ -31,16 +31,16 @@ var (
 )
 
 func (msg *Message) AddMessage(value string, messageType int) {
-	msg.msgType = messageType
-	msg.value = value
+	msg.MsgType = messageType
+	msg.Value = value
 }
 
 func (msg *Message) ShowMessage() string {
-	switch msg.msgType {
+	switch msg.MsgType {
 	case ErrorMessage:
-		return errStyle.Render(msg.value)
+		return errStyle.Render(msg.Value)
 	case SuccessMessage:
-		return successStyle.Render(msg.value)
+		return successStyle.Render(msg.Value)
 	}
 
 	return msgStyle.Render("")

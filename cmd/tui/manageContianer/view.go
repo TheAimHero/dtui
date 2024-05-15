@@ -16,9 +16,7 @@ import (
 )
 
 var (
-  physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
-	errorDuration                    = 5 * time.Second
-	successDuration                  = 2 * time.Second
+	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
 )
 
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -35,6 +33,16 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case message.ClearErrorMsg:
 		m.message = message.Message{}
+
+	case message.Message:
+		m.message = msg
+		var duration time.Duration
+		if msg.MsgType == message.SuccessMessage {
+			duration = message.SuccessDuration
+		} else {
+			duration = message.ErrorDuration
+		}
+		return m, m.message.ClearMessage(duration)
 
 	case time.Time:
 		err := m.dockerClient.FetchContainers()
