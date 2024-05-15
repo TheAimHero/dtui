@@ -95,7 +95,12 @@ func (m logModel) View() string {
 }
 
 func (m logModel) headerView() string {
-	title := titleStyle.Render("Container Log: " + m.title)
+	var title string
+	if m.title == "" {
+		title = titleStyle.Render("Select Container")
+	} else {
+		title = titleStyle.Render("Container Log: " + m.title)
+	}
 	line := lineStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title))))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
