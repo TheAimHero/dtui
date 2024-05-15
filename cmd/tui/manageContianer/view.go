@@ -11,7 +11,6 @@ import (
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
 
@@ -96,13 +95,8 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m containerModel) View() string {
 	doc := strings.Builder{}
-	align := lipgloss.NewStyle().Align(lipgloss.NoTabConversion)
-	doc.WriteString(align.Render(ui_table.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage()))
-	if m.log != nil {
-		doc.WriteString(m.log.View())
-	} else {
-		doc.WriteString(strings.Repeat("\n", 20))
-	}
+	// doc.WriteString(m.execTime.View())
+	doc.WriteString(ui_table.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage())
 	doc.WriteString("\n" + m.help.View(m.keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 7)))
 	return doc.String()
