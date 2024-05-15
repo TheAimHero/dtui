@@ -9,7 +9,8 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/ui/message"
+	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
@@ -18,7 +19,7 @@ type imageModel struct {
 	help           help.Model
 	keys           keyMap
 	dockerClient   docker.DockerClient
-	message        ui.Message
+	message        message.Message
 	table          table.Model
 }
 
@@ -29,7 +30,7 @@ func (m imageModel) Init() tea.Cmd {
 func getTable(images docker.Images, selectedImages mapset.Set[string]) table.Model {
 	tableColumns := getTableColumns()
 	tableRows := getTableRows(images, selectedImages)
-	return ui.NewTable(tableColumns, tableRows)
+	return ui_table.NewTable(tableColumns, tableRows)
 }
 
 func NewModel(dockerClient docker.DockerClient) tea.Model {
@@ -42,7 +43,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		keys:           keys,
 	}
 	if err != nil {
-		m.message.AddMessage("Error while fetching images", ui.ErrorMessage)
+		m.message.AddMessage("Error while fetching images", message.ErrorMessage)
 		m.message.ClearMessage(2 * time.Second)
 	}
 	return m

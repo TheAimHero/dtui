@@ -1,4 +1,4 @@
-package ui
+package table
 
 import (
 	"github.com/charmbracelet/bubbles/table"

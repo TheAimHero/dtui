@@ -45,6 +45,7 @@ func NewTui() error {
 	}
   model := NewModel(dockerClient)
 	p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
+  // for dev purpose
 	// p := tea.NewProgram(model)
 	_, err = p.Run()
 	if err != nil {

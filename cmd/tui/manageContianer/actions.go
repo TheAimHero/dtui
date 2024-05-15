@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -21,22 +21,27 @@ func (m *containerModel) ClearSelectedContainers() {
 }
 
 func (m containerModel) StartContainer() (tea.Model, tea.Cmd) {
-	err := m.dockerClient.StartContainer(m.table.SelectedRow()[ContainerID])
-	if err != nil {
-		m.message.AddMessage(fmt.Sprintf("Error while starting container: %s", strings.Split(err.Error(), ":")[ContainerName]), ui.ErrorMessage)
+	row := m.table.SelectedRow()
+	if row == nil {
+		m.message.AddMessage("No container selected", message.ErrorMessage)
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage(fmt.Sprintf("Container %s started", m.table.SelectedRow()[ContainerName]), ui.SuccessMessage)
+	err := m.dockerClient.StartContainer(row[ContainerID])
+	if err != nil {
+		m.message.AddMessage(fmt.Sprintf("Error while starting container: %s", strings.Split(err.Error(), ":")[1]), message.ErrorMessage)
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	m.message.AddMessage(fmt.Sprintf("Container %s started", m.table.SelectedRow()[ContainerName]), message.SuccessMessage)
 	return m, m.message.ClearMessage(successDuration)
 }
 
 func (m containerModel) StopContainer() (tea.Model, tea.Cmd) {
 	err := m.dockerClient.StopContainer(m.table.SelectedRow()[ContainerID])
 	if err != nil {
-		m.message.AddMessage(fmt.Sprintf("Error while stopping container: %s", strings.Split(err.Error(), ":")[ContainerName]), ui.ErrorMessage)
+		m.message.AddMessage(fmt.Sprintf("Error while stopping container: %s", strings.Split(err.Error(), ":")[ContainerName]), message.ErrorMessage)
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage(fmt.Sprintf("Container %s stopped", m.table.SelectedRow()[ContainerName]), ui.SuccessMessage)
+	m.message.AddMessage(fmt.Sprintf("Container %s stopped", m.table.SelectedRow()[ContainerName]), message.SuccessMessage)
 	return m, m.message.ClearMessage(successDuration)
 }
 
@@ -50,11 +55,11 @@ func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
 		}
 	}
 	if len(errors) > 0 {
-		m.message.AddMessage("Error while starting some containers", ui.ErrorMessage)
+		m.message.AddMessage("Error while starting some containers", message.ErrorMessage)
 		m.selectedContainers.Clear()
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Containers started", ui.SuccessMessage)
+	m.message.AddMessage("Containers started", message.SuccessMessage)
 	m.selectedContainers.Clear()
 	return m, m.message.ClearMessage(successDuration)
 }
@@ -68,11 +73,11 @@ func (m containerModel) StopContainers() (tea.Model, tea.Cmd) {
 		}
 	}
 	if len(errors) > 0 {
-		m.message.AddMessage("Error while stopping some containers", ui.ErrorMessage)
+		m.message.AddMessage("Error while stopping some containers", message.ErrorMessage)
 		m.selectedContainers.Clear()
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Containers stopped", ui.SuccessMessage)
+	m.message.AddMessage("Containers stopped", message.SuccessMessage)
 	m.selectedContainers.Clear()
 	return m, m.message.ClearMessage(successDuration)
 }
@@ -103,16 +108,25 @@ func (m containerModel) SelectAllContainers() (tea.Model, tea.Cmd) {
 }
 
 func (m containerModel) DeleteContainer() (tea.Model, tea.Cmd) {
-	err := m.dockerClient.DeleteContainer(m.table.SelectedRow()[ContainerID])
-	if err != nil {
-		m.message.AddMessage(fmt.Sprintf("Error while deleting container: %s", strings.Split(err.Error(), ":")[ContainerName]), ui.ErrorMessage)
+	row := m.table.SelectedRow()
+	if row == nil {
+		m.message.AddMessage("No container selected", message.ErrorMessage)
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage(fmt.Sprintf("Container %s deleted", m.table.SelectedRow()[ContainerName]), ui.SuccessMessage)
+	err := m.dockerClient.DeleteContainer(row[ContainerID])
+	if err != nil {
+		m.message.AddMessage(fmt.Sprintf("Error while deleting container: %s", strings.Split(err.Error(), ":")[ContainerName]), message.ErrorMessage)
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	m.message.AddMessage(fmt.Sprintf("Container %s deleted", m.table.SelectedRow()[ContainerName]), message.SuccessMessage)
 	return m, m.message.ClearMessage(successDuration)
 }
 
-func (m containerModel) DeleteContainers() (tea.Model, tea.Cmd) {
+func (m *containerModel) DeleteContainers() (tea.Model, tea.Cmd) {
+	if len(m.selectedContainers.ToSlice()) == 0 {
+		m.message.AddMessage("No containers selected", message.ErrorMessage)
+		return m, m.message.ClearMessage(errorDuration)
+	}
 	errors := make([]string, 0)
 	for _, containerID := range m.selectedContainers.ToSlice() {
 		err := m.dockerClient.DeleteContainer(containerID)
@@ -121,11 +135,11 @@ func (m containerModel) DeleteContainers() (tea.Model, tea.Cmd) {
 		}
 	}
 	if len(errors) > 0 {
-		m.message.AddMessage("Error while deleting some containers", ui.ErrorMessage)
+		m.message.AddMessage("Error while deleting some containers", message.ErrorMessage)
 		m.selectedContainers.Clear()
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Containers deleted", ui.SuccessMessage)
+	m.message.AddMessage("Containers deleted", message.SuccessMessage)
 	m.selectedContainers.Clear()
 	return m, m.message.ClearMessage(successDuration)
 }

@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/ui"
+	ui_message "github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
@@ -21,7 +21,7 @@ type logModel struct {
 	keys         keyMap
 	dockerClient docker.DockerClient
 	text         []string
-	message      ui.Message
+	message      ui_message.Message
 	table        table.Model
 }
 
@@ -51,7 +51,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		keys:         keys,
 	}
 	if err != nil {
-		m.message.AddMessage("Error while fetching containers", ui.ErrorMessage)
+		m.message.AddMessage("Error while fetching containers", ui_message.ErrorMessage)
 	}
 	return m
 }

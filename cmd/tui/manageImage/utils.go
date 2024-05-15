@@ -1,6 +1,7 @@
 package manageimage
 
 import (
+	"sort"
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
@@ -12,6 +13,10 @@ import (
 
 func getTableRows(images docker.Images, selectedRows mapset.Set[string]) []table.Row {
 	tableRows := []table.Row{}
+	if len(images) == 0 {
+		return tableRows
+	}
+	sort.SliceStable(images, func(i, j int) bool { return images[i].ID > images[j].ID })
 	for _, image := range images {
 		var selected string
 		var tag string

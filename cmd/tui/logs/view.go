@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -17,19 +18,19 @@ import (
 var (
 	physicalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
 
-	lineStyle = lipgloss.NewStyle().Foreground(ui.HighlightColor)
+	lineStyle = lipgloss.NewStyle().Foreground(table.HighlightColor)
 
 	contentStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#F8F8F2"))
 
 	titleStyle = func() lipgloss.Style {
 		b := lipgloss.NormalBorder()
 		b.Right = "├"
-		return lipgloss.NewStyle().BorderStyle(b).BorderForeground(ui.HighlightColor)
+		return lipgloss.NewStyle().BorderStyle(b).BorderForeground(table.HighlightColor)
 	}()
 	infoStyle = func() lipgloss.Style {
 		b := lipgloss.NormalBorder()
 		b.Left = "┤"
-		return titleStyle.Copy().BorderStyle(b).BorderForeground(ui.HighlightColor)
+		return titleStyle.Copy().BorderStyle(b).BorderForeground(table.HighlightColor)
 	}()
 )
 
@@ -45,14 +46,14 @@ func (m logModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.viewport.GotoBottom()
 		return m, tea.Batch(waitForActivity(m.sub))
 
-	case ui.ClearErrorMsg:
-		m.message = ui.Message{}
+	case message.ClearErrorMsg:
+		m.message = message.Message{}
 
 	case time.Time:
 		err := m.dockerClient.FetchContainers()
 		if err != nil {
-			m.message.AddMessage("Error while fetching containers", ui.ErrorMessage)
-			return m, m.message.ClearMessage(ui.ErrorDuration)
+			m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
+			return m, m.message.ClearMessage(message.ErrorDuration)
 		}
 		tableRows := getTableRows(m.dockerClient.Containers)
 		m.table.SetRows(tableRows)
@@ -86,7 +87,7 @@ func (m logModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m logModel) View() string {
 	doc := strings.Builder{}
-	doc.WriteString(ui.BaseTableStyle.Copy().Margin(1).Render(m.table.View()))
+	doc.WriteString(table.BaseTableStyle.Copy().Margin(1).Render(m.table.View()))
 	doc.WriteString(fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
 	doc.WriteString("\n" + m.message.ShowMessage())
 	doc.WriteString("\n" + m.help.View(m.keys))

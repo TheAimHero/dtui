@@ -1,7 +1,7 @@
 package manageimage
 
 import (
-	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -14,23 +14,40 @@ const (
 )
 
 func (m imageModel) DeleteImage() (tea.Model, tea.Cmd) {
-	err := m.dockerClient.DeleteImage()
-	if err != nil {
-		m.message.AddMessage(err.Error(), ui.ErrorMessage)
+	row := m.table.SelectedRow()
+	if row == nil {
+		m.message.AddMessage("No image selected", message.ErrorMessage)
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Image deleted", ui.SuccessMessage)
+
+	err := m.dockerClient.DeleteImage(row[ImageID])
+	if err != nil {
+		m.message.AddMessage(err.Error(), message.ErrorMessage)
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	m.message.AddMessage("Image deleted", message.SuccessMessage)
 	return m, m.message.ClearMessage(successDuration)
 }
 
 func (m imageModel) DeleteImages() (tea.Model, tea.Cmd) {
-	errors := m.dockerClient.DeleteImages(m.selectedImages.ToSlice())
+	var errors []string
+	if len(m.selectedImages.ToSlice()) == 0 {
+		m.message.AddMessage("No images selected", message.ErrorMessage)
+		return m, m.message.ClearMessage(errorDuration)
+	}
+	for _, imageID := range m.selectedImages.ToSlice() {
+		err := m.dockerClient.DeleteImage(imageID)
+		if err != nil {
+			errors = append(errors, err.Error())
+		}
+	}
+	// errors := m.dockerClient.DeleteImages(m.selectedImages.ToSlice())
 	if len(errors) > 0 {
-		m.message.AddMessage("Error while deleting some images", ui.ErrorMessage)
+		m.message.AddMessage("Error while deleting some images", message.ErrorMessage)
 		m.selectedImages.Clear()
 		return m, m.message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Images deleted", ui.SuccessMessage)
+	m.message.AddMessage("Images deleted", message.SuccessMessage)
 	m.selectedImages.Clear()
 	return m, m.message.ClearMessage(successDuration)
 }

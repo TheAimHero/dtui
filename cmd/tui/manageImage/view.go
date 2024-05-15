@@ -7,33 +7,26 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 
-	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/ui/message"
+	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	ui_utils "github.com/TheAimHero/dtui/internal/ui/utils"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 var (
-	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
 	successDuration                  = 2 * time.Second
 	errorDuration                    = 5 * time.Second
 )
 
-func heightPadding(doc strings.Builder) int {
-	paddingHeight := physicalHeight - lipgloss.Height(doc.String()) - 7
-	if paddingHeight < 0 {
-		paddingHeight = 0
-	}
-	return paddingHeight
-}
-
 func (m imageModel) View() string {
 	doc := strings.Builder{}
-	doc.WriteString(ui.BaseTableStyle.Render(m.table.View()))
+	doc.WriteString(ui_table.BaseTableStyle.Render(m.table.View()))
 	doc.WriteString("\n" + m.message.ShowMessage())
 	doc.WriteString("\n" + m.help.View(m.keys))
-	doc.WriteString(strings.Repeat("\n", heightPadding(doc)))
+	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 7)))
 	return doc.String()
 }
 
@@ -45,14 +38,14 @@ func (m imageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table = getTable(m.dockerClient.Images, m.selectedImages)
 		return m, cmd
 
-	case ui.ClearErrorMsg:
-		m.message = ui.Message{}
+	case message.ClearErrorMsg:
+		m.message = message.Message{}
 
 	case time.Time:
 		err := m.dockerClient.FetchImages()
 		if err != nil {
-			m.message.AddMessage("Error while fetching images", ui.ErrorMessage)
-			return m, tea.Batch(utils.TickCommand(), m.message.ClearMessage(ui.ErrorDuration))
+			m.message.AddMessage("Error while fetching images", message.ErrorMessage)
+			return m, tea.Batch(utils.TickCommand(), m.message.ClearMessage(message.ErrorDuration))
 		}
 		tableRows := getTableRows(m.dockerClient.Images, m.selectedImages)
 		m.table.SetRows(tableRows)

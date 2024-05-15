@@ -5,7 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/TheAimHero/dtui/internal/ui"
+	"github.com/TheAimHero/dtui/internal/ui/message"
+	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	ui_utils "github.com/TheAimHero/dtui/internal/ui/utils"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,18 +16,10 @@ import (
 )
 
 var (
-	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+  physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
 	errorDuration                    = 5 * time.Second
 	successDuration                  = 2 * time.Second
 )
-
-func heightPadding(doc strings.Builder) int {
-	paddingHeight := physicalHeight - lipgloss.Height(doc.String()) - 7
-	if paddingHeight < 0 {
-		paddingHeight = 0
-	}
-	return paddingHeight
-}
 
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
@@ -39,14 +33,14 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.table = getTable(m.dockerClient.Containers, m.selectedContainers)
 		return m, cmd
 
-	case ui.ClearErrorMsg:
-		m.message = ui.Message{}
+	case message.ClearErrorMsg:
+		m.message = message.Message{}
 
 	case time.Time:
 		err := m.dockerClient.FetchContainers()
 		if err != nil {
-			m.message.AddMessage("Error while fetching containers", ui.ErrorMessage)
-			return m, tea.Batch(m.message.ClearMessage(ui.ErrorDuration), utils.TickCommand())
+			m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
+			return m, tea.Batch(m.message.ClearMessage(message.ErrorDuration), utils.TickCommand())
 		}
 		tableRows := getTableRows(m.dockerClient.Containers, m.selectedContainers)
 		m.table.SetRows(tableRows)
@@ -95,13 +89,13 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m containerModel) View() string {
 	doc := strings.Builder{}
 	align := lipgloss.NewStyle().Align(lipgloss.NoTabConversion)
-	doc.WriteString(align.Render(ui.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage()))
+	doc.WriteString(align.Render(ui_table.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage()))
 	if m.log != nil {
 		doc.WriteString(m.log.View())
 	} else {
 		doc.WriteString(strings.Repeat("\n", 20))
 	}
 	doc.WriteString("\n" + m.help.View(m.keys))
-	doc.WriteString(strings.Repeat("\n", heightPadding(doc)))
+	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 7)))
 	return doc.String()
 }
