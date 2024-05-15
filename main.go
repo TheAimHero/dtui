@@ -1,6 +1,6 @@
 package main
 
-import "github.com/TheAimHero/dtui/cmd/tui"
+import "github.com/TheAimHero/dtui/cmd/tui/tabs"
 
 func main() {
 	err := tui.NewTui()
