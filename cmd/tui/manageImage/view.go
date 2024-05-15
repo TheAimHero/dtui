@@ -15,8 +15,6 @@ import (
 )
 
 var (
-	highlightColor                   = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
-	helpStyle                        = lipgloss.NewStyle().Align(lipgloss.Bottom)
 	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
 	successDuration                  = 2 * time.Second
 	errorDuration                    = 5 * time.Second
@@ -51,10 +49,14 @@ func (m imageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.message = ui.Message{}
 
 	case time.Time:
-		m.dockerClient.FetchImages()
+		err := m.dockerClient.FetchImages()
+		if err != nil {
+			m.message.AddMessage("Error while fetching images", ui.ErrorMessage)
+			return m, tea.Batch(utils.TickCommand(), m.message.ClearMessage(ui.ErrorDuration))
+		}
 		tableRows := getTableRows(m.dockerClient.Images, m.selectedImages)
 		m.table.SetRows(tableRows)
-    return m, utils.TickCommand()
+		return m, utils.TickCommand()
 
 	case tea.KeyMsg:
 		switch {

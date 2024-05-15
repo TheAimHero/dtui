@@ -28,7 +28,11 @@ func heightPadding(doc strings.Builder) int {
 }
 
 func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
@@ -39,23 +43,20 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.message = ui.Message{}
 
 	case time.Time:
-		m.dockerClient.FetchContainers()
+		err := m.dockerClient.FetchContainers()
+		if err != nil {
+			m.message.AddMessage("Error while fetching containers", ui.ErrorMessage)
+			return m, tea.Batch(m.message.ClearMessage(ui.ErrorDuration), utils.TickCommand())
+		}
 		tableRows := getTableRows(m.dockerClient.Containers, m.selectedContainers)
 		m.table.SetRows(tableRows)
+
 		return m, utils.TickCommand()
 
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Quit):
 			return m, tea.Quit
-
-		case key.Matches(msg, m.keys.Down):
-			m.table.MoveDown(1)
-			return m, nil
-
-		case key.Matches(msg, m.keys.Up):
-			m.table.MoveUp(1)
-			return m, cmd
 
 		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
@@ -86,7 +87,9 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	}
-	return m, cmd
+	m.table, cmd = m.table.Update(msg)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
 }
 
 func (m containerModel) View() string {

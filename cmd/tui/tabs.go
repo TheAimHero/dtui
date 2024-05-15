@@ -30,23 +30,11 @@ var (
 		BottomLeft:  "┴",
 		BottomRight: "┴",
 	}
-	endTabBorder = lipgloss.Border{
-		Top:         " ",
-		Bottom:      "┐",
-		Left:        " ",
-		Right:       " ",
-		TopLeft:     " ",
-		TopRight:    " ",
-		BottomLeft:  " ",
-		BottomRight: " ",
-	}
-	inactiveTabBorder = lipgloss.NewStyle().Border(lipgloss.NormalBorder())
-	docStyle          = lipgloss.NewStyle().Padding(0, 0, 0, 0)
-	inactiveTabStyle  = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui.HighlightColor)
-	padTabStyle       = lipgloss.NewStyle().Foreground(ui.HighlightColor)
-	tabEndStyle       = lipgloss.NewStyle().Border(endTabBorder, false, false, true, false).BorderForeground(ui.HighlightColor)
-	activeTabStyle    = inactiveTabStyle.Copy().Border(activeTabBorder, true)
-	windowStyle       = lipgloss.NewStyle().BorderForeground(ui.HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop().Padding(2, 0)
+	docStyle         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
+	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui.HighlightColor)
+	padTabStyle      = lipgloss.NewStyle().Foreground(ui.HighlightColor)
+	activeTabStyle   = inactiveTabStyle.Copy().Border(activeTabBorder, true)
+	windowStyle      = lipgloss.NewStyle().BorderForeground(ui.HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop().Padding(2, 0)
 )
 
 func Tab(m MainModel) string {
@@ -77,7 +65,11 @@ func Tab(m MainModel) string {
 		renderedTabs = append(renderedTabs, style.Render(m.TabsTitle[i]))
 	}
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
-	paddingBorder := padTabStyle.Render(strings.Repeat("─", physicalWidth-lipgloss.Width(row)-1) + "┐")
+	repeatCount := physicalWidth - lipgloss.Width(row) - 1
+	if repeatCount < 0 {
+		repeatCount = 0
+	}
+	paddingBorder := padTabStyle.Render(strings.Repeat("─", repeatCount) + "┐")
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, paddingBorder)
 	doc.WriteString(row)
 	doc.WriteString(windowStyle.Width((physicalWidth - windowStyle.GetHorizontalFrameSize())).Render(m.Tabs[m.ActiveTab].View()))

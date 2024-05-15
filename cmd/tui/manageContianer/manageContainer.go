@@ -25,12 +25,6 @@ func (m containerModel) Init() tea.Cmd {
 	return tea.Batch(utils.TickCommand())
 }
 
-func getTable(containers docker.Containers, selectedRows mapset.Set[string]) table.Model {
-	tableColumns := getTableColumns()
-	tableRows := getTableRows(containers, selectedRows)
-	return ui.NewTable(tableColumns, tableRows)
-}
-
 func NewModel(dockerClient docker.DockerClient) tea.Model {
 	err := dockerClient.FetchContainers()
 	table := getTable(dockerClient.Containers, mapset.NewSet[string]())

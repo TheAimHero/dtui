@@ -2,15 +2,46 @@ package logs
 
 import (
 	"bufio"
-	"fmt"
 	"io"
-	"os"
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/docker"
+	"github.com/TheAimHero/dtui/internal/ui"
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+const (
+	ContainerID = iota
+	ContainerName
+	ContainerImage
+	ContainerStatus
+)
+
+type responseMsg string
+
+func getTable(containers docker.Containers) table.Model {
+	tableColumns := getTableColumns()
+	tableRows := getTableRows(containers)
+	table := ui.NewTable(tableColumns, tableRows)
+	table.KeyMap.HalfPageDown.Unbind()
+	table.KeyMap.HalfPageUp.Unbind()
+	table.KeyMap.GotoBottom.Unbind()
+	table.KeyMap.GotoTop.Unbind()
+	table.KeyMap.PageDown.Unbind()
+	table.KeyMap.PageUp.Unbind()
+	return table
+}
+
+func getViewPort() viewport.Model {
+	vp := viewport.New(physicalWidth-10, 10)
+	vp.KeyMap.Down.Unbind()
+	vp.KeyMap.Up.Unbind()
+	vp.KeyMap.PageDown.Unbind()
+	vp.KeyMap.PageUp.Unbind()
+	return vp
+}
 
 func getTableRows(containers docker.Containers) []table.Row {
 	tableRows := []table.Row{}
@@ -35,8 +66,6 @@ func getTableColumns() []table.Column {
 	}
 }
 
-type responseMsg string
-
 func listenForActivity(sub chan<- responseMsg, stream io.ReadCloser) tea.Cmd {
 	if stream == nil {
 		return nil
@@ -49,7 +78,7 @@ func listenForActivity(sub chan<- responseMsg, stream io.ReadCloser) tea.Cmd {
 			sub <- responseMsg(text)
 		}
 		if err := scanner.Err(); err != nil {
-			fmt.Fprintf(os.Stderr, "error reading input: %v\n", err)
+			return nil
 		}
 		return nil
 	}

@@ -44,3 +44,4 @@ func getTableColumns() []table.Column {
 		{Title: "Size", Width: width},
 	}
 }
+

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/docker"
+	"github.com/TheAimHero/dtui/internal/ui"
 	"github.com/charmbracelet/bubbles/table"
 	mapset "github.com/deckarep/golang-set/v2"
 )
@@ -39,3 +40,15 @@ func getTableColumns() []table.Column {
 	}
 }
 
+func getTable(containers docker.Containers, selectedRows mapset.Set[string]) table.Model {
+	tableColumns := getTableColumns()
+	tableRows := getTableRows(containers, selectedRows)
+	table := ui.NewTable(tableColumns, tableRows)
+	table.KeyMap.HalfPageDown.Unbind()
+	table.KeyMap.HalfPageUp.Unbind()
+	table.KeyMap.GotoBottom.Unbind()
+	table.KeyMap.GotoTop.Unbind()
+	table.KeyMap.PageDown.Unbind()
+	table.KeyMap.PageUp.Unbind()
+	return table
+}

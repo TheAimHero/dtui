@@ -42,7 +42,7 @@ func formatFileSize(bytes int64) string {
 		unit = "EB"
 	}
 
-	return fmt.Sprintf("%.2f %s", size, unit)
+	return fmt.Sprintf("%.2f%s", size, unit)
 }
 
 func GetSize(size int64) string {

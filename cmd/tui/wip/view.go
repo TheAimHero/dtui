@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	// nolint:unused
 	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
 )
 
