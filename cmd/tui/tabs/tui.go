@@ -1,4 +1,4 @@
-package tui
+package tabs
 
 import (
 	logs "github.com/TheAimHero/dtui/cmd/tui/logs"
