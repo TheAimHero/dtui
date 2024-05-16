@@ -86,7 +86,8 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.DeleteContainers):
 			return m.DeleteContainers()
 		}
-
+	default:
+		return m, tea.Println("Received unknown message")
 	}
 	m.table, cmd = m.table.Update(msg)
 	cmds = append(cmds, cmd)
@@ -95,7 +96,6 @@ func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m containerModel) View() string {
 	doc := strings.Builder{}
-	// doc.WriteString(m.execTime.View())
 	doc.WriteString(ui_table.BaseTableStyle.Render(m.table.View()) + m.message.ShowMessage())
 	doc.WriteString("\n" + m.help.View(m.keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 7)))

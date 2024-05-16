@@ -1,6 +1,10 @@
 package docker
 
 import (
+	"context"
+	"errors"
+
+	"github.com/charmbracelet/lipgloss"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
@@ -19,6 +23,12 @@ func NewDockerClient() (DockerClient, error) {
 	client, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return DockerClient{}, err
+	}
+	_, err = client.Ping(context.Background())
+	if err != nil {
+		return DockerClient{}, errors.New(lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#cb4154")).
+			Render("Docker is not running...\nStart Docker and try again."))
 	}
 	return DockerClient{client: client}, nil
 }

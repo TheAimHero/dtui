@@ -1,10 +1,14 @@
 package main
 
-import "github.com/TheAimHero/dtui/cmd/tui/tabs"
+import (
+	"fmt"
+
+	"github.com/TheAimHero/dtui/cmd/tui/tabs"
+)
 
 func main() {
-	err := tui.NewTui()
+	err := tabs.NewTui()
 	if err != nil {
-		panic(err)
+		fmt.Println(err.Error())
 	}
 }
