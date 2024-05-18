@@ -47,11 +47,11 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ActiveTab = WipTab
 			return m, m.callInit()
 
-		case "right", "l", "n", "tab":
+		case "right", "l":
 			m.ActiveTab = min(m.ActiveTab+1, len(m.Tabs)-1)
 			return m, nil
 
-		case "left", "h", "p", "shift+tab":
+		case "left", "h":
 			m.ActiveTab = max(m.ActiveTab-1, 0)
 			return m, nil
 

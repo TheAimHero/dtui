@@ -20,7 +20,7 @@ type MainModel struct {
 
 func (m MainModel) Init() tea.Cmd {
 	cmds := []tea.Cmd{}
-  cmds = append(cmds, m.Tabs[m.ActiveTab].Init())
+	cmds = append(cmds, m.Tabs[m.ActiveTab].Init())
 	return tea.Batch(cmds...)
 }
 
@@ -35,17 +35,17 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		ActiveTab: 0,
 		InitTab:   mapset.NewSet[int](),
 	}
-  return model
+	return model
 }
 
 func NewTui() error {
 	dockerClient, err := docker.NewDockerClient()
 	if err != nil {
-		panic(err) 
+		return err
 	}
-  model := NewModel(dockerClient)
+	model := NewModel(dockerClient)
 	p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
-  // for dev purpose
+	// for dev purpose
 	// p := tea.NewProgram(model)
 	_, err = p.Run()
 	if err != nil {
