@@ -20,6 +20,12 @@ func NewTable(tableColumns []table.Column, tableRows []table.Row) table.Model {
 		table.WithFocused(true),
 		table.WithHeight(10),
 	)
+	t.KeyMap.HalfPageDown.Unbind()
+	t.KeyMap.HalfPageUp.Unbind()
+	t.KeyMap.GotoBottom.Unbind()
+	t.KeyMap.GotoTop.Unbind()
+	t.KeyMap.PageDown.Unbind()
+	t.KeyMap.PageUp.Unbind()
 
 	s := table.DefaultStyles()
 	s.Header = s.Header.

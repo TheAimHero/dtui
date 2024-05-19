@@ -44,11 +44,5 @@ func getTable(containers docker.Containers, selectedRows mapset.Set[string]) tab
 	tableColumns := getTableColumns()
 	tableRows := getTableRows(containers, selectedRows)
 	table := ui_table.NewTable(tableColumns, tableRows)
-	table.KeyMap.HalfPageDown.Unbind()
-	table.KeyMap.HalfPageUp.Unbind()
-	table.KeyMap.GotoBottom.Unbind()
-	table.KeyMap.GotoTop.Unbind()
-	table.KeyMap.PageDown.Unbind()
-	table.KeyMap.PageUp.Unbind()
 	return table
 }

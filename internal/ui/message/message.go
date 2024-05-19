@@ -22,7 +22,7 @@ const (
   SuccessDuration = 2 * time.Second
 )
 
-type ClearErrorMsg struct{}
+type ClearMessage struct{}
 
 var (
 	msgStyle     = lipgloss.NewStyle().Padding(1, 0)
@@ -48,6 +48,6 @@ func (msg *Message) ShowMessage() string {
 
 func (msg Message) ClearMessage(t time.Duration) tea.Cmd {
 	return tea.Tick(t, func(_ time.Time) tea.Msg {
-		return ClearErrorMsg{}
+		return ClearMessage{}
 	})
 }

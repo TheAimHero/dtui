@@ -2,8 +2,10 @@ package tabs
 
 import (
 	"os"
+	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
 
@@ -14,58 +16,84 @@ const (
 	WipTab
 )
 
+var (
+	activeTabBorder = lipgloss.Border{
+		Top:         "─",
+		Bottom:      " ",
+		Left:        "│",
+		Right:       "│",
+		TopLeft:     "┌",
+		TopRight:    "┐",
+		BottomLeft:  "┘",
+		BottomRight: "└",
+	}
+	tabBorder = lipgloss.Border{
+		Top:         "─",
+		Bottom:      "─",
+		Left:        "│",
+		Right:       "│",
+		TopLeft:     "┌",
+		TopRight:    "┐",
+		BottomLeft:  "┴",
+		BottomRight: "┴",
+	}
+	docStyle         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
+	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui_table.HighlightColor)
+	padTabStyle      = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
+	activeTabStyle   = inactiveTabStyle.Copy().Border(activeTabBorder, true)
+	windowStyle      = lipgloss.NewStyle().BorderForeground(ui_table.HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop().Padding(2, 0)
+)
+
+func TabView(m MainModel) string {
+	switch m.ActiveTab {
+	case ContainerTab:
+		return m.ContainerTab.View()
+	case ImageTab:
+		return m.ImageTab.View()
+	case LogsTab:
+		return m.LogsTab.View()
+	case WipTab:
+		return m.WipTab.View()
+	default:
+		return ""
+	}
+}
+
 func (m MainModel) View() string {
-	return Tab(m)
-}
+	doc := strings.Builder{}
+	physicalWidth, _, _ := term.GetSize(int(os.Stdout.Fd()))
 
-func (m *MainModel) callInit() tea.Cmd {
-	if m.InitTab.Contains(m.ActiveTab) {
-		return nil
-	}
-	m.InitTab.Add(m.ActiveTab)
-	return m.Tabs[m.ActiveTab].Init()
-}
-
-func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "1":
-			m.ActiveTab = ContainerTab
-			return m, m.callInit()
-
-		case "2":
-			m.ActiveTab = ImageTab
-			return m, m.callInit()
-
-		case "3":
-			m.ActiveTab = LogsTab
-			return m, m.callInit()
-
-		case "4":
-			m.ActiveTab = WipTab
-			return m, m.callInit()
-
-		case "right", "l":
-			m.ActiveTab = min(m.ActiveTab+1, len(m.Tabs)-1)
-			return m, nil
-
-		case "left", "h":
-			m.ActiveTab = max(m.ActiveTab-1, 0)
-			return m, nil
-
-		case "ctrl+c", "q":
-			return m, tea.Quit
+	var renderedTabs []string
+	for i := range m.TabsTitle {
+		var style lipgloss.Style
+		isFirst, isLast, isActive := i == 0, i == len(m.TabsTitle)-1, i == m.ActiveTab
+		if isActive {
+			style = activeTabStyle.Copy()
+		} else {
+			style = inactiveTabStyle.Copy()
 		}
-
-	case tea.WindowSizeMsg:
-		physicalWidth, physicalHeight, _ := term.GetSize(int(os.Stdout.Fd()))
-		m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Height: physicalHeight, Width: physicalWidth})
-		return m, cmd
+		border, _, _, _, _ := style.GetBorder()
+		if isFirst && isActive {
+			border.BottomLeft = "│"
+		} else if isFirst && !isActive {
+			border.BottomLeft = "├"
+		} else if isLast && isActive {
+			border.BottomRight = "└"
+		} else if isLast && !isActive {
+			border.BottomRight = "┴"
+		}
+		style = style.Border(border)
+		renderedTabs = append(renderedTabs, style.Render(m.TabsTitle[i]))
 	}
-	activeTab := m.Tabs[m.ActiveTab]
-	updatedTab, cmd := activeTab.Update(msg)
-	m.Tabs[m.ActiveTab] = updatedTab
-	return m, tea.Batch(cmd)
+	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
+	repeatCount := physicalWidth - lipgloss.Width(row) - 1
+	if repeatCount < 0 {
+		repeatCount = 0
+	}
+	paddingBorder := padTabStyle.Render(strings.Repeat("─", repeatCount) + "┐")
+	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, paddingBorder)
+	doc.WriteString(row)
+
+	doc.WriteString(windowStyle.Width((physicalWidth - windowStyle.GetHorizontalFrameSize())).Render(TabView(m)))
+	return docStyle.Render(doc.String())
 }

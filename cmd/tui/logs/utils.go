@@ -16,17 +16,10 @@ const (
 	ContainerStatus
 )
 
-
 func getTable(containers docker.Containers) table.Model {
 	tableColumns := getTableColumns()
 	tableRows := getTableRows(containers)
 	table := ui_table.NewTable(tableColumns, tableRows)
-	table.KeyMap.HalfPageDown.Unbind()
-	table.KeyMap.HalfPageUp.Unbind()
-	table.KeyMap.GotoBottom.Unbind()
-	table.KeyMap.GotoTop.Unbind()
-	table.KeyMap.PageDown.Unbind()
-	table.KeyMap.PageUp.Unbind()
 	return table
 }
 

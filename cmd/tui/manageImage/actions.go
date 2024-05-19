@@ -13,7 +13,7 @@ const (
 	ImageSize
 )
 
-func (m imageModel) DeleteImage() (tea.Model, tea.Cmd) {
+func (m imageModel) DeleteImage() (imageModel, tea.Cmd) {
 	row := m.table.SelectedRow()
 	if row == nil {
 		m.message.AddMessage("No image selected", message.ErrorMessage)
@@ -29,7 +29,7 @@ func (m imageModel) DeleteImage() (tea.Model, tea.Cmd) {
 	return m, m.message.ClearMessage(successDuration)
 }
 
-func (m imageModel) DeleteImages() (tea.Model, tea.Cmd) {
+func (m imageModel) DeleteImages() (imageModel, tea.Cmd) {
 	var errors []string
 	if len(m.selectedImages.ToSlice()) == 0 {
 		m.message.AddMessage("No images selected", message.ErrorMessage)
@@ -52,7 +52,7 @@ func (m imageModel) DeleteImages() (tea.Model, tea.Cmd) {
 	return m, m.message.ClearMessage(successDuration)
 }
 
-func (m imageModel) SelectImage() (tea.Model, tea.Cmd) {
+func (m imageModel) SelectImage() (imageModel, tea.Cmd) {
 	if len(m.table.Rows()) == 0 {
 		return m, nil
 	}
@@ -66,7 +66,7 @@ func (m imageModel) SelectImage() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m imageModel) SelectAllImages() (tea.Model, tea.Cmd) {
+func (m imageModel) SelectAllImages() (imageModel, tea.Cmd) {
 	var allIDs []string
 	for _, row := range m.table.Rows() {
 		allIDs = append(allIDs, row[ImageID])

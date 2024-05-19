@@ -4,13 +4,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/table"
-	"github.com/TheAimHero/dtui/internal/utils"
-	"github.com/charmbracelet/bubbles/key"
-	tea "github.com/charmbracelet/bubbletea"
+	ui_utils "github.com/TheAimHero/dtui/internal/ui/utils"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
 )
@@ -34,63 +30,13 @@ var (
 	}()
 )
 
-func (m logModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
-	)
-	switch msg := msg.(type) {
-	case utils.ResponseMsg:
-		m.text = append(m.text, string(msg))
-		m.viewport.SetContent(contentStyle.Render(strings.Join(m.text, "\n")))
-		m.viewport.GotoBottom()
-		return m, tea.Batch(utils.ResponseToStream(m.sub))
-
-	case message.ClearErrorMsg:
-		m.message = message.Message{}
-
-	case time.Time:
-		err := m.dockerClient.FetchContainers()
-		if err != nil {
-			m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
-			return m, m.message.ClearMessage(message.ErrorDuration)
-		}
-		tableRows := getTableRows(m.dockerClient.Containers)
-		m.table.SetRows(tableRows)
-		return m, utils.TickCommand()
-
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keys.Quit):
-			return m, tea.Quit
-
-		case key.Matches(msg, m.keys.Help):
-			m.help.ShowAll = !m.help.ShowAll
-
-		case key.Matches(msg, m.keys.Select):
-			m, cmd = m.GetLogs()
-			return m, tea.Batch(cmd, utils.ListenToStream(m.sub, m.stream))
-		}
-
-	case tea.WindowSizeMsg:
-		physicalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
-		m.table = getTable(m.dockerClient.Containers)
-		m.viewport.Width = msg.Width - 20
-		return m, cmd
-	}
-	m.viewport, cmd = m.viewport.Update(msg)
-	cmds = append(cmds, cmd)
-	m.table, cmd = m.table.Update(msg)
-	cmds = append(cmds, cmd)
-	return m, tea.Batch(cmds...)
-}
-
 func (m logModel) View() string {
 	doc := strings.Builder{}
-	doc.WriteString(table.BaseTableStyle.Copy().Margin(1).Render(m.table.View()))
-	doc.WriteString(fmt.Sprintf("%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
+	doc.WriteString(table.BaseTableStyle.Copy().Render(m.table.View()))
+	doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
 	doc.WriteString("\n" + m.message.ShowMessage())
 	doc.WriteString("\n" + m.help.View(m.keys))
+	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))
 	return doc.String()
 }
 

@@ -7,21 +7,20 @@ import (
 	wip "github.com/TheAimHero/dtui/cmd/tui/wip"
 	"github.com/TheAimHero/dtui/internal/docker"
 	tea "github.com/charmbracelet/bubbletea"
-	mapset "github.com/deckarep/golang-set/v2"
 )
 
 type MainModel struct {
-	InitTab      mapset.Set[int]
+	ContainerTab tea.Model
+	ImageTab     tea.Model
+	LogsTab      tea.Model
+	WipTab       tea.Model
 	DockerClient docker.DockerClient
 	TabsTitle    []string
-	Tabs         []tea.Model
 	ActiveTab    int
 }
 
 func (m MainModel) Init() tea.Cmd {
-	cmds := []tea.Cmd{}
-	cmds = append(cmds, m.Tabs[m.ActiveTab].Init())
-	return tea.Batch(cmds...)
+	return tea.Batch(m.ContainerTab.Init(), m.ImageTab.Init(), m.LogsTab.Init(), m.WipTab.Init())
 }
 
 func NewModel(dockerClient docker.DockerClient) tea.Model {
@@ -30,10 +29,13 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 	logsModel := logs.NewModel(dockerClient)
 	wipModel := wip.NewModel()
 	model := MainModel{
-		TabsTitle: []string{"Manage Container", "Manage Images", "View Logs", "Work In Progress"},
-		Tabs:      []tea.Model{containerModel, imageModel, logsModel, wipModel},
-		ActiveTab: 0,
-		InitTab:   mapset.NewSet[int](),
+		TabsTitle:    []string{"Manage Container", "Manage Images", "View Logs", "Work In Progress"},
+		ContainerTab: containerModel,
+		ImageTab:     imageModel,
+		LogsTab:      logsModel,
+		WipTab:       wipModel,
+		DockerClient: dockerClient,
+		ActiveTab:    0,
 	}
 	return model
 }

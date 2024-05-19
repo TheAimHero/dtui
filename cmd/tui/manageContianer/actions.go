@@ -20,7 +20,7 @@ func (m *containerModel) ClearSelectedContainers() {
 	m.selectedContainers.Clear()
 }
 
-func (m containerModel) StartContainer() (tea.Model, tea.Cmd) {
+func (m containerModel) StartContainer() (containerModel, tea.Cmd) {
 	startMsg := message.Message{}
 	row := m.table.SelectedRow()
 	if row == nil {
@@ -34,11 +34,11 @@ func (m containerModel) StartContainer() (tea.Model, tea.Cmd) {
 			return startMsg
 		}
 		startMsg.AddMessage(fmt.Sprintf("Container %s started", m.table.SelectedRow()[ContainerName]), message.SuccessMessage)
-    return startMsg
+		return startMsg
 	}
 }
 
-func (m containerModel) StopContainer() (tea.Model, tea.Cmd) {
+func (m containerModel) StopContainer() (containerModel, tea.Cmd) {
 	stopMsg := message.Message{}
 	return m, func() tea.Msg {
 		err := m.dockerClient.StopContainer(m.table.SelectedRow()[ContainerID])
@@ -51,7 +51,7 @@ func (m containerModel) StopContainer() (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
+func (m containerModel) StartContainers() (containerModel, tea.Cmd) {
 	startMsg := message.Message{}
 	selectedContainers := m.selectedContainers.ToSlice()
 	defer m.ClearSelectedContainers()
@@ -78,7 +78,7 @@ func (m containerModel) StartContainers() (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m containerModel) StopContainers() (tea.Model, tea.Cmd) {
+func (m containerModel) StopContainers() (containerModel, tea.Cmd) {
 	errors := make([]string, 0)
 	selectedContainers := m.selectedContainers.ToSlice()
 	stopMsg := message.Message{}
@@ -100,7 +100,7 @@ func (m containerModel) StopContainers() (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m containerModel) SelectContainers() (tea.Model, tea.Cmd) {
+func (m containerModel) SelectContainers() (containerModel, tea.Cmd) {
 	containerID := m.table.SelectedRow()[ContainerID]
 	if m.selectedContainers.Contains(containerID) {
 		m.selectedContainers.Remove(containerID)
@@ -111,7 +111,7 @@ func (m containerModel) SelectContainers() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m containerModel) SelectAllContainers() (tea.Model, tea.Cmd) {
+func (m containerModel) SelectAllContainers() (containerModel, tea.Cmd) {
 	var allIDs []string
 	for _, row := range m.table.Rows() {
 		allIDs = append(allIDs, row[ContainerID])
@@ -125,7 +125,7 @@ func (m containerModel) SelectAllContainers() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m containerModel) DeleteContainer() (tea.Model, tea.Cmd) {
+func (m containerModel) DeleteContainer() (containerModel, tea.Cmd) {
 	deleteMsg := message.Message{}
 	row := m.table.SelectedRow()
 	if row == nil {
@@ -143,7 +143,7 @@ func (m containerModel) DeleteContainer() (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m containerModel) DeleteContainers() (tea.Model, tea.Cmd) {
+func (m containerModel) DeleteContainers() (containerModel, tea.Cmd) {
 	defer m.ClearSelectedContainers()
 	selectedContainers := m.selectedContainers.ToSlice()
 	if len(selectedContainers) == 0 {
