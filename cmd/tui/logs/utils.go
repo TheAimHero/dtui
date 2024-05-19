@@ -1,15 +1,12 @@
 package logs
 
 import (
-	"bufio"
-	"io"
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/viewport"
-	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
@@ -19,7 +16,6 @@ const (
 	ContainerStatus
 )
 
-type responseMsg string
 
 func getTable(containers docker.Containers) table.Model {
 	tableColumns := getTableColumns()
@@ -63,29 +59,5 @@ func getTableColumns() []table.Column {
 		{Title: "Name", Width: width},
 		{Title: "Image", Width: width},
 		{Title: "Status", Width: width},
-	}
-}
-
-func listenForActivity(sub chan<- responseMsg, stream io.ReadCloser) tea.Cmd {
-	if stream == nil {
-		return nil
-	}
-	return func() tea.Msg {
-		defer stream.Close()
-		scanner := bufio.NewScanner(stream)
-		for scanner.Scan() {
-			text := scanner.Text()
-			sub <- responseMsg(text)
-		}
-		if err := scanner.Err(); err != nil {
-			return nil
-		}
-		return nil
-	}
-}
-
-func waitForActivity(sub chan responseMsg) tea.Cmd {
-	return func() tea.Msg {
-		return responseMsg(<-sub)
 	}
 }

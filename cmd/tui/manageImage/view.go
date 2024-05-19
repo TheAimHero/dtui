@@ -15,6 +15,8 @@ import (
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
+type ShowTextInput struct{}
+
 var (
 	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
 	successDuration                  = 2 * time.Second
@@ -31,7 +33,10 @@ func (m imageModel) View() string {
 }
 
 func (m imageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
@@ -72,7 +77,8 @@ func (m imageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.DeleteImages()
 		}
 	}
-
 	m.table, cmd = m.table.Update(msg)
-	return m, cmd
+	cmds = append(cmds, cmd)
+	cmds = append(cmds, cmd)
+	return m, tea.Batch(cmds...)
 }

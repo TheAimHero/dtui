@@ -40,11 +40,11 @@ func (m logModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 	switch msg := msg.(type) {
-	case responseMsg:
+	case utils.ResponseMsg:
 		m.text = append(m.text, string(msg))
 		m.viewport.SetContent(contentStyle.Render(strings.Join(m.text, "\n")))
 		m.viewport.GotoBottom()
-		return m, tea.Batch(waitForActivity(m.sub))
+		return m, tea.Batch(utils.ResponseToStream(m.sub))
 
 	case message.ClearErrorMsg:
 		m.message = message.Message{}
@@ -69,7 +69,7 @@ func (m logModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.Select):
 			m, cmd = m.GetLogs()
-			return m, tea.Batch(cmd, listenForActivity(m.sub, m.stream))
+			return m, tea.Batch(cmd, utils.ListenToStream(m.sub, m.stream))
 		}
 
 	case tea.WindowSizeMsg:

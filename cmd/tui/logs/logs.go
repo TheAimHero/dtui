@@ -14,7 +14,7 @@ import (
 
 type logModel struct {
 	stream       io.ReadCloser
-	sub          chan responseMsg
+	sub          chan utils.ResponseMsg
 	help         help.Model
 	title        string
 	viewport     viewport.Model
@@ -32,7 +32,7 @@ func (m logModel) Init() tea.Cmd {
 	)
 	m, cmd = m.GetLogs()
 	cmds = append(cmds, cmd)
-	cmds = append(cmds, waitForActivity(m.sub), utils.TickCommand())
+	cmds = append(cmds, utils.ResponseToStream(m.sub), utils.TickCommand())
 	return tea.Batch(cmds...)
 }
 
@@ -45,7 +45,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		dockerClient: dockerClient,
 		viewport:     viewport,
 		table:        table,
-		sub:          make(chan responseMsg),
+		sub:          make(chan utils.ResponseMsg),
 		text:         []string{},
 		help:         help,
 		keys:         keys,
