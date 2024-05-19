@@ -2,6 +2,7 @@ package managecontianer
 
 import (
 	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -13,29 +14,33 @@ import (
 
 type ContainerModel struct {
 	selectedContainers mapset.Set[string]
+	inProcesss         mapset.Set[string]
 	help               help.Model
 	keys               keyMap
 	dockerClient       docker.DockerClient
 	message            message.Message
 	table              table.Model
+	spinner            spinner.Model
 }
 
 func (m ContainerModel) Init() tea.Cmd {
-	return tea.Batch(utils.TickCommand())
+	return tea.Batch(utils.TickCommand(), m.spinner.Tick)
 }
 
 func NewModel(dockerClient docker.DockerClient) ContainerModel {
 	err := dockerClient.FetchContainers()
-	table := getTable(dockerClient.Containers, mapset.NewSet[string]())
+	spinner := getSpinner()
 	help := getHelpSection()
 	m := ContainerModel{
 		dockerClient:       dockerClient,
-		table:              table,
 		help:               help,
+		spinner:            spinner,
 		selectedContainers: mapset.NewSet[string](),
+		inProcesss:         mapset.NewSet[string](),
 		message:            message.Message{},
 		keys:               keys,
 	}
+	m.table = m.getTable()
 	if err != nil {
 		m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
 		m.message.ClearMessage(message.SuccessDuration)

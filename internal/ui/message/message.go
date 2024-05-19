@@ -18,8 +18,8 @@ const (
 )
 
 const (
-  ErrorDuration = 5 * time.Second
-  SuccessDuration = 2 * time.Second
+	ErrorDuration   = 5 * time.Second
+	SuccessDuration = 2 * time.Second
 )
 
 type ClearMessage struct{}

@@ -58,7 +58,7 @@ func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadC
 		stream io.ReadCloser
 		err    error
 	)
-  // @fix: this causes tui to become unresponsive for a while
+	// @fix: this causes tui to become unresponsive for a while
 	stream, err = m.dockerClient.PullImage(imageName)
 	m.text = []string{}
 	if err != nil {

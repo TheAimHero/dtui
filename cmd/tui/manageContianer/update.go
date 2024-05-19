@@ -19,7 +19,7 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
-		m.table = getTable(m.dockerClient.Containers, m.selectedContainers)
+		m.table = m.getTable()
 
 	case message.ClearMessage:
 		m.message = message.Message{}
@@ -40,7 +40,12 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 			m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
 			cmds = append(cmds, m.message.ClearMessage(message.ErrorDuration), utils.TickCommand())
 		}
-		tableRows := getTableRows(m.dockerClient.Containers, m.selectedContainers)
+		tableRows := getTableRows(
+			m.dockerClient.Containers,
+			m.selectedContainers,
+			m.inProcesss,
+			m.spinner,
+		)
 		m.table.SetRows(tableRows)
 		cmds = append(cmds, utils.TickCommand())
 
@@ -86,6 +91,8 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 		}
 	}
 	m.table, cmd = m.table.Update(msg)
+	cmds = append(cmds, cmd)
+	m.spinner, cmd = m.spinner.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
 }

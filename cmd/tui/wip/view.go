@@ -7,20 +7,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/term"
+
+	"github.com/TheAimHero/dtui/internal/ui/utils"
 )
 
 var (
 	// nolint:unused
 	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
 )
-
-func heightPadding(doc strings.Builder) int {
-	paddingHeight := physicalHeight - lipgloss.Height(doc.String()) - 7
-	if paddingHeight < 0 {
-		paddingHeight = 0
-	}
-	return paddingHeight
-}
 
 func (m WipModel) View() string {
 	doc := strings.Builder{}
@@ -35,8 +29,7 @@ func (m WipModel) View() string {
 	doc.WriteString(emphasisStyle.Render("-\tLog Mode"))
 	doc.WriteString(titleStyle.UnsetPadding().Render("\nGive a Star on GitHub\n"))
 	doc.WriteString(titleStyle.Render("Thats all folks!"))
-  // @todo: adjust the fixHeight for consistency
-	doc.WriteString(strings.Repeat("\n", heightPadding(doc)))
+	doc.WriteString(strings.Repeat("\n", utils.HeightPadding(doc, 8)))
 	return doc.String()
 }
 

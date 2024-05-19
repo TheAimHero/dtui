@@ -40,7 +40,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.SelectImage, k.SelectAllImages},
 		{k.DeleteImage, k.DeleteSelectedImages},
 		{k.ShowInput, k.PullImage},
-    {k.EscapeInput},
+		{k.EscapeInput},
 	}
 }
 
@@ -97,7 +97,7 @@ var keys = keyMap{
 	EscapeInput: key.NewBinding(
 		key.WithKeys("esc"),
 		key.WithHelp("esc", "escape input"),
-    key.WithDisabled(),
+		key.WithDisabled(),
 	),
 }
 

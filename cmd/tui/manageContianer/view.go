@@ -18,7 +18,6 @@ func (m ContainerModel) View() string {
 	doc.WriteString(ui_table.BaseTableStyle.Render(m.table.View()))
 	doc.WriteString("\n" + m.message.ShowMessage())
 	doc.WriteString("\n" + m.help.View(m.keys))
-  // @todo: adjust the fixHeight for consistency
-	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 7)))
+	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))
 	return doc.String()
 }

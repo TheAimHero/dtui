@@ -25,14 +25,14 @@ func (m ImageModel) updateInput(msg tea.KeyMsg) (ImageModel, tea.Cmd) {
 		m.Table.Focus()
 		m.Input = textinput.Model{}
 		m.Table, cmd = m.Table.Update(msg)
-    m.keys.ShowInput.SetEnabled(true)
+		m.keys.ShowInput.SetEnabled(true)
 		m.keys.EscapeInput.SetEnabled(false)
 		return m, cmd
 
 	case "enter":
 		m.Table.Focus()
 		imageName := m.Input.Value()
-    m.keys.ShowInput.SetEnabled(true)
+		m.keys.ShowInput.SetEnabled(true)
 		m.Input = textinput.Model{}
 		if len(imageName) == 0 {
 			m.message.AddMessage("Please enter image name", message.ErrorMessage)
@@ -122,7 +122,7 @@ func (m ImageModel) Update(msg tea.Msg) (ImageModel, tea.Cmd) {
 
 		case key.Matches(msg, m.keys.ShowInput):
 			m.Input = getInput()
-      m.keys.ShowInput.SetEnabled(false)
+			m.keys.ShowInput.SetEnabled(false)
 			m.keys.EscapeInput.SetEnabled(true)
 			cmds = append(cmds, m.Input.Focus())
 
