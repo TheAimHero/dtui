@@ -1,6 +1,8 @@
 package manageimage
 
 import (
+	"io"
+
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -13,8 +15,8 @@ const (
 	ImageSize
 )
 
-func (m imageModel) DeleteImage() (imageModel, tea.Cmd) {
-	row := m.table.SelectedRow()
+func (m ImageModel) DeleteImage() (ImageModel, tea.Cmd) {
+	row := m.Table.SelectedRow()
 	if row == nil {
 		m.message.AddMessage("No image selected", message.ErrorMessage)
 		return m, m.message.ClearMessage(errorDuration)
@@ -29,7 +31,7 @@ func (m imageModel) DeleteImage() (imageModel, tea.Cmd) {
 	return m, m.message.ClearMessage(successDuration)
 }
 
-func (m imageModel) DeleteImages() (imageModel, tea.Cmd) {
+func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 	var errors []string
 	if len(m.selectedImages.ToSlice()) == 0 {
 		m.message.AddMessage("No images selected", message.ErrorMessage)
@@ -52,26 +54,41 @@ func (m imageModel) DeleteImages() (imageModel, tea.Cmd) {
 	return m, m.message.ClearMessage(successDuration)
 }
 
-func (m imageModel) SelectImage() (imageModel, tea.Cmd) {
-	if len(m.table.Rows()) == 0 {
+func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadCloser) {
+	var (
+		stream io.ReadCloser
+		err    error
+	)
+	stream, err = m.dockerClient.PullImage(imageName)
+	m.text = []string{}
+	if err != nil {
+		m.message.AddMessage(err.Error(), message.ErrorMessage)
+		return *m, m.message.ClearMessage(errorDuration), stream
+	}
+	m.message.AddMessage("Image pulled successfully", message.SuccessMessage)
+	return *m, m.message.ClearMessage(successDuration), stream
+}
+
+func (m ImageModel) SelectImage() (ImageModel, tea.Cmd) {
+	if len(m.Table.Rows()) == 0 {
 		return m, nil
 	}
-	imageID := m.table.SelectedRow()[ImageID]
+	imageID := m.Table.SelectedRow()[ImageID]
 	if m.selectedImages.Contains(imageID) {
 		m.selectedImages.Remove(imageID)
 	} else {
 		m.selectedImages.Add(imageID)
 	}
-	m.table.MoveDown(1)
+	m.Table.MoveDown(1)
 	return m, nil
 }
 
-func (m imageModel) SelectAllImages() (imageModel, tea.Cmd) {
+func (m ImageModel) SelectAllImages() (ImageModel, tea.Cmd) {
 	var allIDs []string
-	for _, row := range m.table.Rows() {
+	for _, row := range m.Table.Rows() {
 		allIDs = append(allIDs, row[ImageID])
 	}
-	if m.selectedImages.Cardinality() == len(m.table.Rows()) {
+	if m.selectedImages.Cardinality() == len(m.Table.Rows()) {
 		m.selectedImages.Clear()
 	} else {
 		m.selectedImages.Clear()

@@ -12,7 +12,7 @@ import (
 	"golang.org/x/term"
 )
 
-func (m logModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m LogModel) Update(msg tea.Msg) (LogModel, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd

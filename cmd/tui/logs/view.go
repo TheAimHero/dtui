@@ -30,7 +30,7 @@ var (
 	}()
 )
 
-func (m logModel) View() string {
+func (m LogModel) View() string {
 	doc := strings.Builder{}
 	doc.WriteString(table.BaseTableStyle.Copy().Render(m.table.View()))
 	doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
@@ -40,7 +40,7 @@ func (m logModel) View() string {
 	return doc.String()
 }
 
-func (m logModel) headerView() string {
+func (m LogModel) headerView() string {
 	var title string
 	if m.title == "" {
 		title = titleStyle.Render("Select Container")
@@ -51,7 +51,7 @@ func (m logModel) headerView() string {
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
-func (m logModel) footerView() string {
+func (m LogModel) footerView() string {
 	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
 	line := lineStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info))))
 	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)

@@ -5,6 +5,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
 
@@ -14,17 +16,32 @@ import (
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
-type imageModel struct {
+type ImageModel struct {
 	selectedImages mapset.Set[string]
+	sub            chan utils.ResponseMsg
+	text           []string
+	viewport       viewport.Model
 	help           help.Model
 	keys           keyMap
 	dockerClient   docker.DockerClient
 	message        message.Message
-	table          table.Model
+	Input          textinput.Model
+	Table          table.Model
 }
 
-func (m imageModel) Init() tea.Cmd {
-	return utils.TickCommand()
+func (m ImageModel) Init() tea.Cmd {
+	var (
+		// cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
+	cmds = append(cmds, utils.ResponseToStream(m.sub), utils.TickCommand())
+	return tea.Batch(cmds...)
+}
+
+func getInput() textinput.Model {
+	ip := textinput.New()
+	ip.Placeholder = "Image Name"
+	return ip
 }
 
 func getTable(images docker.Images, selectedImages mapset.Set[string]) table.Model {
@@ -33,12 +50,14 @@ func getTable(images docker.Images, selectedImages mapset.Set[string]) table.Mod
 	return ui_table.NewTable(tableColumns, tableRows)
 }
 
-func NewModel(dockerClient docker.DockerClient) tea.Model {
+func NewModel(dockerClient docker.DockerClient) ImageModel {
 	err := dockerClient.FetchImages()
-	m := imageModel{
+	m := ImageModel{
 		dockerClient:   dockerClient,
-		table:          getTable(dockerClient.Images, mapset.NewSet[string]()),
+		Table:          getTable(dockerClient.Images, mapset.NewSet[string]()),
 		help:           getHelpSection(),
+		viewport:       getViewPort(),
+		sub:            make(chan utils.ResponseMsg),
 		selectedImages: mapset.NewSet[string](),
 		keys:           keys,
 	}

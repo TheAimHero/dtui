@@ -11,7 +11,7 @@ import (
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
-type containerModel struct {
+type ContainerModel struct {
 	selectedContainers mapset.Set[string]
 	help               help.Model
 	keys               keyMap
@@ -20,15 +20,15 @@ type containerModel struct {
 	table              table.Model
 }
 
-func (m containerModel) Init() tea.Cmd {
+func (m ContainerModel) Init() tea.Cmd {
 	return tea.Batch(utils.TickCommand())
 }
 
-func NewModel(dockerClient docker.DockerClient) tea.Model {
+func NewModel(dockerClient docker.DockerClient) ContainerModel {
 	err := dockerClient.FetchContainers()
 	table := getTable(dockerClient.Containers, mapset.NewSet[string]())
 	help := getHelpSection()
-	m := containerModel{
+	m := ContainerModel{
 		dockerClient:       dockerClient,
 		table:              table,
 		help:               help,

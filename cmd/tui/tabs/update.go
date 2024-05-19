@@ -74,6 +74,10 @@ func (m MainModel) updateCurrentTab(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	if m.ImageTab.Input.Focused() {
+		m.ImageTab, cmd = m.ImageTab.Update(msg)
+		return m, cmd
+	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {

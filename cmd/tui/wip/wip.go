@@ -4,17 +4,16 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type wipModel struct {
+type WipModel struct {
 	Title string
 }
 
-func (m wipModel) Init() tea.Cmd {
+func (m WipModel) Init() tea.Cmd {
 	return nil
 }
 
-
-func NewModel() tea.Model {
-	return wipModel{
+func NewModel() WipModel {
+	return WipModel{
 		Title: "Work In Progress",
 	}
 }

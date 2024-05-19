@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"github.com/docker/docker/api/types/image"
@@ -18,4 +19,9 @@ func (m *DockerClient) DeleteImage(imageID string) error {
 	defer cancel()
 	_, err := m.client.ImageRemove(ctx, imageID, image.RemoveOptions{PruneChildren: true})
 	return err
+}
+
+func (m *DockerClient) PullImage(imageName string) (io.ReadCloser, error) {
+	stream, err := m.client.ImagePull(context.Background(), imageName, image.PullOptions{})
+	return stream, err
 }

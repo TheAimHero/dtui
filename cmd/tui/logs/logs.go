@@ -12,7 +12,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type logModel struct {
+type LogModel struct {
 	stream       io.ReadCloser
 	sub          chan utils.ResponseMsg
 	help         help.Model
@@ -25,7 +25,7 @@ type logModel struct {
 	table        table.Model
 }
 
-func (m logModel) Init() tea.Cmd {
+func (m LogModel) Init() tea.Cmd {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd
@@ -36,12 +36,12 @@ func (m logModel) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func NewModel(dockerClient docker.DockerClient) tea.Model {
+func NewModel(dockerClient docker.DockerClient) LogModel {
 	err := dockerClient.FetchContainers()
 	viewport := getViewPort()
 	table := getTable(dockerClient.Containers)
 	help := getHelpSection()
-	m := logModel{
+	m := LogModel{
 		dockerClient: dockerClient,
 		viewport:     viewport,
 		table:        table,

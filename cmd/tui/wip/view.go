@@ -22,7 +22,7 @@ func heightPadding(doc strings.Builder) int {
 	return paddingHeight
 }
 
-func (m wipModel) View() string {
+func (m WipModel) View() string {
 	doc := strings.Builder{}
 	baseStyle := lipgloss.NewStyle().Padding(1, 2)
 	emphasisStyle := baseStyle.Copy().Bold(true).Foreground(lipgloss.Color("#F1FA8C"))
@@ -35,11 +35,12 @@ func (m wipModel) View() string {
 	doc.WriteString(emphasisStyle.Render("-\tLog Mode"))
 	doc.WriteString(titleStyle.UnsetPadding().Render("\nGive a Star on GitHub\n"))
 	doc.WriteString(titleStyle.Render("Thats all folks!"))
+  // @todo: adjust the fixHeight for consistency
 	doc.WriteString(strings.Repeat("\n", heightPadding(doc)))
 	return doc.String()
 }
 
-func (m wipModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m WipModel) Update(msg tea.Msg) (WipModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))

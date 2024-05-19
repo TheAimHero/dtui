@@ -5,11 +5,21 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/viewport"
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/size"
 )
+
+func getViewPort() viewport.Model {
+	vp := viewport.New(physicalWidth-10, 10)
+	vp.KeyMap.Down.Unbind()
+	vp.KeyMap.Up.Unbind()
+	vp.KeyMap.PageDown.Unbind()
+	vp.KeyMap.PageUp.Unbind()
+	return vp
+}
 
 func getTableRows(images docker.Images, selectedRows mapset.Set[string]) []table.Row {
 	tableRows := []table.Row{}
@@ -49,4 +59,3 @@ func getTableColumns() []table.Column {
 		{Title: "Size", Width: width},
 	}
 }
-

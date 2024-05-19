@@ -11,7 +11,7 @@ import (
 	"golang.org/x/term"
 )
 
-func (m containerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd

@@ -23,6 +23,9 @@ type keyMap struct {
 	DeleteSelectedImages key.Binding
 	SelectImage          key.Binding
 	SelectAllImages      key.Binding
+	ShowInput            key.Binding
+	PullImage            key.Binding
+	EscapeInput          key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -36,6 +39,8 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Help, k.Quit},
 		{k.SelectImage, k.SelectAllImages},
 		{k.DeleteImage, k.DeleteSelectedImages},
+		{k.ShowInput, k.PullImage},
+    {k.EscapeInput},
 	}
 }
 
@@ -61,7 +66,7 @@ var keys = keyMap{
 		key.WithHelp("?", "toggle help"),
 	),
 	Quit: key.NewBinding(
-		key.WithKeys("q", "esc", "ctrl+c"),
+		key.WithKeys("q", "ctrl+c"),
 		key.WithHelp("q", "quit"),
 	),
 	SelectImage: key.NewBinding(
@@ -79,6 +84,20 @@ var keys = keyMap{
 	DeleteSelectedImages: key.NewBinding(
 		key.WithKeys("D"),
 		key.WithHelp("D", "delete selected images"),
+	),
+	ShowInput: key.NewBinding(
+		key.WithKeys("p"),
+		key.WithHelp("p", "show input"),
+	),
+	PullImage: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "pull image"),
+		key.WithDisabled(),
+	),
+	EscapeInput: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "escape input"),
+    key.WithDisabled(),
 	),
 }
 

@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *logModel) GetLogs() (logModel, tea.Cmd) {
+func (m *LogModel) GetLogs() (LogModel, tea.Cmd) {
 	var (
 		cmds []tea.Cmd
 		err  error

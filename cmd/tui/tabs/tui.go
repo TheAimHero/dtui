@@ -10,12 +10,12 @@ import (
 )
 
 type MainModel struct {
-	ContainerTab tea.Model
-	ImageTab     tea.Model
-	LogsTab      tea.Model
-	WipTab       tea.Model
+	WipTab       wip.WipModel
 	DockerClient docker.DockerClient
 	TabsTitle    []string
+	LogsTab      logs.LogModel
+	ContainerTab managecontianer.ContainerModel
+	ImageTab     manageimage.ImageModel
 	ActiveTab    int
 }
 
@@ -46,9 +46,9 @@ func NewTui() error {
 		return err
 	}
 	model := NewModel(dockerClient)
-	p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
+	// p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	// for dev purpose
-	// p := tea.NewProgram(model)
+	p := tea.NewProgram(model)
 	_, err = p.Run()
 	if err != nil {
 		return err
