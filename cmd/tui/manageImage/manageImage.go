@@ -31,7 +31,6 @@ type ImageModel struct {
 
 func (m ImageModel) Init() tea.Cmd {
 	var (
-		// cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
 	cmds = append(cmds, utils.ResponseToStream(m.sub), utils.TickCommand())

@@ -43,7 +43,6 @@ func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 			errors = append(errors, err.Error())
 		}
 	}
-	// errors := m.dockerClient.DeleteImages(m.selectedImages.ToSlice())
 	if len(errors) > 0 {
 		m.message.AddMessage("Error while deleting some images", message.ErrorMessage)
 		m.selectedImages.Clear()
@@ -59,6 +58,7 @@ func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadC
 		stream io.ReadCloser
 		err    error
 	)
+  // @fix: this causes tui to become unresponsive for a while
 	stream, err = m.dockerClient.PullImage(imageName)
 	m.text = []string{}
 	if err != nil {

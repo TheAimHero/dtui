@@ -29,8 +29,6 @@ func (m *DockerClient) StartContainer(containerID string) error {
 }
 
 func (m *DockerClient) GetLogs(containerID string) (io.ReadCloser, error) {
-	// ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	// defer cancel()
 	stream, err := m.client.ContainerLogs(context.Background(), containerID, container.LogsOptions{Follow: true, ShowStdout: true, Details: true, ShowStderr: true, Timestamps: true})
 	if err != nil {
 		return nil, err
