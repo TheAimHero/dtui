@@ -40,7 +40,7 @@ func getTableRows(containers docker.Containers, selectedContainers mapset.Set[st
 }
 
 func getTableColumns() []table.Column {
-	width := ((physicalWidth) / 5) - 4
+	width := ((physicalWidth) / 4) - 10
 	return []table.Column{
 		{Title: "Select", Width: 8},
 		{Title: "Loading", Width: 9},

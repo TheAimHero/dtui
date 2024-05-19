@@ -1,7 +1,10 @@
 package tabs
 
 import (
+	"os"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/term"
 )
 
 func (m MainModel) getNextTab(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -73,7 +76,10 @@ func (m MainModel) updateCurrentTab(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 	if m.ImageTab.Input.Focused() {
 		m.ImageTab, cmd = m.ImageTab.Update(msg)
 		return m, cmd
@@ -84,22 +90,34 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "1":
 			m.ActiveTab = ContainerTab
 			m.ContainerTab, cmd = m.ContainerTab.Update(msg)
-			return m, cmd
+			cmds = append(cmds, cmd)
+			m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 
 		case "2":
 			m.ActiveTab = ImageTab
 			m.ImageTab, cmd = m.ImageTab.Update(msg)
-			return m, cmd
+			cmds = append(cmds, cmd)
+			m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 
 		case "3":
 			m.ActiveTab = LogsTab
 			m.LogsTab, cmd = m.LogsTab.Update(msg)
-			return m, cmd
+			cmds = append(cmds, cmd)
+			m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 
 		case "4":
 			m.ActiveTab = WipTab
 			m.WipTab, cmd = m.WipTab.Update(msg)
-			return m, cmd
+			cmds = append(cmds, cmd)
+			m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 
 		case "right", "l":
 			return m.getNextTab(msg)
@@ -115,7 +133,8 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.WindowSizeMsg:
-		return m.updateCurrentTab(msg)
+		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+		return m.updateCurrentTab(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 
 	default:
 		return m.updateCurrentTab(msg)
