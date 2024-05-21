@@ -7,52 +7,52 @@ import (
 	"golang.org/x/term"
 )
 
-func (m MainModel) getNextTab(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd  tea.Cmd
 	switch m.ActiveTab {
 	case ContainerTab:
 		m.ActiveTab = ImageTab
-		m.ImageTab, cmd = m.ImageTab.Update(msg)
+		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{})
 		return m, tea.Sequence(m.ImageTab.Init(), cmd)
 
 	case ImageTab:
 		m.ActiveTab = LogsTab
-		m.LogsTab, cmd = m.LogsTab.Update(msg)
+		m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.LogsTab.Init(), cmd)
 
 	case LogsTab:
 		m.ActiveTab = WipTab
-		m.WipTab, cmd = m.WipTab.Update(msg)
+		m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.WipTab.Init(), cmd)
 
 	default:
 		m.ActiveTab = ContainerTab
-		m.ContainerTab, cmd = m.ContainerTab.Update(msg)
+		m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ContainerTab.Init(), cmd)
 	}
 }
 
-func (m MainModel) getPrevTab(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m MainModel) getPrevTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch m.ActiveTab {
 	case ContainerTab:
 		m.ActiveTab = WipTab
-		m.WipTab, cmd = m.WipTab.Update(msg)
+		m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.WipTab.Init(), cmd)
 
 	case ImageTab:
 		m.ActiveTab = ContainerTab
-		m.ContainerTab, cmd = m.ContainerTab.Update(msg)
+		m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ContainerTab.Init(), cmd)
 
 	case LogsTab:
 		m.ActiveTab = ImageTab
-		m.ImageTab, cmd = m.ImageTab.Update(msg)
+		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ImageTab.Init(), cmd)
 
 	default:
 		m.ActiveTab = LogsTab
-		m.LogsTab, cmd = m.LogsTab.Update(msg)
+		m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.LogsTab.Init(), cmd)
 	}
 }
