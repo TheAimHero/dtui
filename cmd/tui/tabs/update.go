@@ -12,7 +12,7 @@ func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.ActiveTab {
 	case ContainerTab:
 		m.ActiveTab = ImageTab
-		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{})
+		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ImageTab.Init(), cmd)
 
 	case ImageTab:
