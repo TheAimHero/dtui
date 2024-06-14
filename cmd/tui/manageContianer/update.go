@@ -114,6 +114,9 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 		case key.Matches(msg, m.Keys.ShowLogs):
 			cmds = append(cmds, showLogs(m.Table.SelectedRow()[ContainerID]))
 
+		case key.Matches(msg, m.Keys.ExecContainer):
+			cmds = append(cmds, execContainer(m.Table.SelectedRow()[ContainerID]))
+
 		case key.Matches(msg, m.Keys.ShowInput):
 			m.Input = getInput()
 			m.Keys.ShowInput.SetEnabled(false)

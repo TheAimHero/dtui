@@ -97,3 +97,8 @@ func showLogs(containerID string) tea.Cmd {
 	c := exec.Command("docker", "logs", containerID, "--follow")
 	return tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }
+
+func execContainer(containerID string) tea.Cmd {
+	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh")
+	return tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
+}
