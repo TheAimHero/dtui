@@ -112,11 +112,7 @@ func (m ImageModel) Update(msg tea.Msg) (ImageModel, tea.Cmd) {
 			m, cmd = m.SelectAllImages()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.Keys.DeleteImage):
-			m, cmd = m.DeleteImage()
-			cmds = append(cmds, cmd)
-
-		case key.Matches(msg, m.Keys.DeleteSelectedImages):
+		case key.Matches(msg, m.Keys.DeleteImages):
 			m, cmd = m.DeleteImages()
 			cmds = append(cmds, cmd)
 
