@@ -15,7 +15,7 @@ const (
 	ImageSize
 )
 
-func (m ImageModel) DeleteImage() (ImageModel, tea.Cmd) {
+func deleteImage(m ImageModel) (ImageModel, tea.Cmd) {
 	row := m.Table.SelectedRow()
 	if row == nil {
 		m.Message.AddMessage("No image selected", message.ErrorMessage)
@@ -34,8 +34,7 @@ func (m ImageModel) DeleteImage() (ImageModel, tea.Cmd) {
 func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 	var errors []string
 	if len(m.SelectedImages.ToSlice()) == 0 {
-		m.Message.AddMessage("No images selected", message.ErrorMessage)
-		return m, m.Message.ClearMessage(errorDuration)
+		return deleteImage(m)
 	}
 	for _, imageID := range m.SelectedImages.ToSlice() {
 		err := m.DockerClient.DeleteImage(imageID)

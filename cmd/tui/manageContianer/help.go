@@ -19,11 +19,8 @@ type keyMap struct {
 	Right            key.Binding
 	Help             key.Binding
 	Quit             key.Binding
-	StartContainer   key.Binding
-	StopContainer    key.Binding
 	StartContainers  key.Binding
 	StopContainers   key.Binding
-	DeleteContainer  key.Binding
 	DeleteContainers key.Binding
 	ToggleSelected   key.Binding
 	ToggleSelectAll  key.Binding
@@ -41,11 +38,10 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Help, k.Quit},
 		{k.Up, k.Down},
 		{k.Left, k.Right},
-		{k.StartContainer, k.StopContainer},
 		{k.StartContainers, k.StopContainers},
-		{k.DeleteContainer, k.DeleteContainers},
+		{k.DeleteContainers, k.SetFilter},
 		{k.ToggleSelected, k.ToggleSelectAll},
-		{k.ShowInput, k.EscapeInput, k.SetFilter},
+		{k.ShowInput, k.EscapeInput},
 	}
 }
 
@@ -74,29 +70,17 @@ var keys = keyMap{
 		key.WithKeys("q", "ctrl+c"),
 		key.WithHelp("q", "quit"),
 	),
-	StartContainer: key.NewBinding(
-		key.WithKeys("s"),
-		key.WithHelp("s", "start container"),
-	),
-	StopContainer: key.NewBinding(
-		key.WithKeys("p"),
-		key.WithHelp("p", "stop container"),
-	),
 	StartContainers: key.NewBinding(
-		key.WithKeys("S"),
-		key.WithHelp("S", "start selected containers"),
+		key.WithKeys("s"),
+		key.WithHelp("s", "start container/s"),
 	),
 	StopContainers: key.NewBinding(
-		key.WithKeys("P"),
-		key.WithHelp("P", "stop selected containers"),
-	),
-	DeleteContainer: key.NewBinding(
-		key.WithKeys("d"),
-		key.WithHelp("d", "delete container"),
+		key.WithKeys("p"),
+		key.WithHelp("p", "stop container/s"),
 	),
 	DeleteContainers: key.NewBinding(
-		key.WithKeys("D"),
-		key.WithHelp("D", "delete selected containers"),
+		key.WithKeys("d"),
+		key.WithHelp("d", "delete container/s"),
 	),
 	ToggleSelected: key.NewBinding(
 		key.WithKeys(" "),

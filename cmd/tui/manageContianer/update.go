@@ -36,6 +36,7 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 	default:
 		m.Input, cmd = m.Input.Update(msg)
 		m.Table.SetRows(filterRows(m.Table.Rows(), m.Input.Value()))
+		m.Table.SetCursor(0)
 		return m, cmd
 	}
 }
@@ -90,14 +91,6 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 		case key.Matches(msg, m.Keys.Help):
 			m.Help.ShowAll = !m.Help.ShowAll
 
-		case key.Matches(msg, m.Keys.StopContainer):
-			m, cmd = m.StopContainer()
-			cmds = append(cmds, cmd)
-
-		case key.Matches(msg, m.Keys.StartContainer):
-			m, cmd = m.StartContainer()
-			cmds = append(cmds, cmd)
-
 		case key.Matches(msg, m.Keys.StartContainers):
 			m, cmd = m.StartContainers()
 			cmds = append(cmds, cmd)
@@ -112,10 +105,6 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 
 		case key.Matches(msg, m.Keys.ToggleSelectAll):
 			m, cmd = m.SelectAllContainers()
-			cmds = append(cmds, cmd)
-
-		case key.Matches(msg, m.Keys.DeleteContainer):
-			m, cmd = m.DeleteContainer()
 			cmds = append(cmds, cmd)
 
 		case key.Matches(msg, m.Keys.DeleteContainers):
