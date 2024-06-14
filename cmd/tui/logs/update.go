@@ -2,7 +2,6 @@ package logs
 
 import (
 	"os"
-	"strings"
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
@@ -20,8 +19,6 @@ func (m LogModel) Update(msg tea.Msg) (LogModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case utils.ResponseMsg:
 		m.Text = append(m.Text, string(msg))
-		m.Viewport.SetContent(contentStyle.Render(strings.Join(m.Text, "\n")))
-		m.Viewport.GotoBottom()
 		cmds = append(cmds, utils.ResponseToStream(m.Sub))
 
 	case message.ClearMessage:
@@ -46,18 +43,13 @@ func (m LogModel) Update(msg tea.Msg) (LogModel, tea.Cmd) {
 			m.Help.ShowAll = !m.Help.ShowAll
 
 		case key.Matches(msg, m.Keys.Select):
-			m, cmd = m.GetLogs()
-			cmds = append(cmds, cmd, utils.ListenToStream(m.Sub, m.Stream))
+			cmds = append(cmds, showLogs(m.Table.SelectedRow()[ContainerID]))
 		}
 
 	case tea.WindowSizeMsg:
 		physicalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
 		m.Table = getTable(m.DockerClient.Containers)
-		m.Viewport.Width = msg.Width - 20
 	}
-
-	m.Viewport, cmd = m.Viewport.Update(msg)
-	cmds = append(cmds, cmd)
 	m.Table, cmd = m.Table.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)

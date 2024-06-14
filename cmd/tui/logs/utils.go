@@ -1,12 +1,13 @@
 package logs
 
 import (
+	"os/exec"
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
@@ -23,13 +24,9 @@ func getTable(containers docker.Containers) table.Model {
 	return table
 }
 
-func getViewPort() viewport.Model {
-	vp := viewport.New(physicalWidth-10, 10)
-	vp.KeyMap.Down.Unbind()
-	vp.KeyMap.Up.Unbind()
-	vp.KeyMap.PageDown.Unbind()
-	vp.KeyMap.PageUp.Unbind()
-	return vp
+func showLogs(containerID string) tea.Cmd {
+	c := exec.Command("docker", "logs", containerID, "--follow")
+	return tea.ExecProcess(c, func(err error) tea.Msg { return nil })
 }
 
 func getTableRows(containers docker.Containers) []table.Row {
