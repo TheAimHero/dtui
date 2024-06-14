@@ -32,27 +32,27 @@ var (
 
 func (m LogModel) View() string {
 	doc := strings.Builder{}
-	doc.WriteString(table.BaseTableStyle.Copy().Render(m.table.View()))
-	doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
-	doc.WriteString("\n" + m.message.ShowMessage())
-	doc.WriteString("\n" + m.help.View(m.keys))
+	doc.WriteString(table.BaseTableStyle.Copy().Render(m.Table.View()))
+	doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.Viewport.View(), m.footerView()))
+	doc.WriteString("\n" + m.Message.ShowMessage())
+	doc.WriteString("\n" + m.Help.View(m.Keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))
 	return doc.String()
 }
 
 func (m LogModel) headerView() string {
 	var title string
-	if m.title == "" {
+	if m.Title == "" {
 		title = titleStyle.Render("Select Container")
 	} else {
-		title = titleStyle.Render("Container Log: " + m.title)
+		title = titleStyle.Render("Container Log: " + m.Title)
 	}
-	line := lineStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title))))
+	line := lineStyle.Render(strings.Repeat("─", max(0, m.Viewport.Width-lipgloss.Width(title))))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
 func (m LogModel) footerView() string {
-	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-	line := lineStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info))))
+	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.Viewport.ScrollPercent()*100))
+	line := lineStyle.Render(strings.Repeat("─", max(0, m.Viewport.Width-lipgloss.Width(info))))
 	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
 }

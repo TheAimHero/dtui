@@ -13,16 +13,16 @@ import (
 )
 
 type LogModel struct {
-	stream       io.ReadCloser
-	sub          chan utils.ResponseMsg
-	help         help.Model
-	title        string
-	viewport     viewport.Model
-	keys         keyMap
-	dockerClient docker.DockerClient
-	text         []string
-	message      ui_message.Message
-	table        table.Model
+	Stream       io.ReadCloser
+	Sub          chan utils.ResponseMsg
+	Help         help.Model
+	Title        string
+	Viewport     viewport.Model
+	Keys         keyMap
+	DockerClient docker.DockerClient
+	Text         []string
+	Message      ui_message.Message
+	Table        table.Model
 }
 
 func (m LogModel) Init() tea.Cmd {
@@ -32,7 +32,7 @@ func (m LogModel) Init() tea.Cmd {
 	)
 	m, cmd = m.GetLogs()
 	cmds = append(cmds, cmd)
-	cmds = append(cmds, utils.ResponseToStream(m.sub), utils.TickCommand())
+	cmds = append(cmds, utils.ResponseToStream(m.Sub), utils.TickCommand())
 	return tea.Batch(cmds...)
 }
 
@@ -42,16 +42,16 @@ func NewModel(dockerClient docker.DockerClient) LogModel {
 	table := getTable(dockerClient.Containers)
 	help := getHelpSection()
 	m := LogModel{
-		dockerClient: dockerClient,
-		viewport:     viewport,
-		table:        table,
-		sub:          make(chan utils.ResponseMsg),
-		text:         []string{},
-		help:         help,
-		keys:         keys,
+		DockerClient: dockerClient,
+		Viewport:     viewport,
+		Table:        table,
+		Sub:          make(chan utils.ResponseMsg),
+		Text:         []string{},
+		Help:         help,
+		Keys:         keys,
 	}
 	if err != nil {
-		m.message.AddMessage("Error while fetching containers", ui_message.ErrorMessage)
+		m.Message.AddMessage("Error while fetching containers", ui_message.ErrorMessage)
 	}
 	return m
 }

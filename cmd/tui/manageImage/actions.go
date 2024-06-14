@@ -18,39 +18,39 @@ const (
 func (m ImageModel) DeleteImage() (ImageModel, tea.Cmd) {
 	row := m.Table.SelectedRow()
 	if row == nil {
-		m.message.AddMessage("No image selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(errorDuration)
+		m.Message.AddMessage("No image selected", message.ErrorMessage)
+		return m, m.Message.ClearMessage(errorDuration)
 	}
 
-	err := m.dockerClient.DeleteImage(row[ImageID])
+	err := m.DockerClient.DeleteImage(row[ImageID])
 	if err != nil {
-		m.message.AddMessage(err.Error(), message.ErrorMessage)
-		return m, m.message.ClearMessage(errorDuration)
+		m.Message.AddMessage(err.Error(), message.ErrorMessage)
+		return m, m.Message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Image deleted", message.SuccessMessage)
-	return m, m.message.ClearMessage(successDuration)
+	m.Message.AddMessage("Image deleted", message.SuccessMessage)
+	return m, m.Message.ClearMessage(successDuration)
 }
 
 func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 	var errors []string
-	if len(m.selectedImages.ToSlice()) == 0 {
-		m.message.AddMessage("No images selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(errorDuration)
+	if len(m.SelectedImages.ToSlice()) == 0 {
+		m.Message.AddMessage("No images selected", message.ErrorMessage)
+		return m, m.Message.ClearMessage(errorDuration)
 	}
-	for _, imageID := range m.selectedImages.ToSlice() {
-		err := m.dockerClient.DeleteImage(imageID)
+	for _, imageID := range m.SelectedImages.ToSlice() {
+		err := m.DockerClient.DeleteImage(imageID)
 		if err != nil {
 			errors = append(errors, err.Error())
 		}
 	}
 	if len(errors) > 0 {
-		m.message.AddMessage("Error while deleting some images", message.ErrorMessage)
-		m.selectedImages.Clear()
-		return m, m.message.ClearMessage(errorDuration)
+		m.Message.AddMessage("Error while deleting some images", message.ErrorMessage)
+		m.SelectedImages.Clear()
+		return m, m.Message.ClearMessage(errorDuration)
 	}
-	m.message.AddMessage("Images deleted", message.SuccessMessage)
-	m.selectedImages.Clear()
-	return m, m.message.ClearMessage(successDuration)
+	m.Message.AddMessage("Images deleted", message.SuccessMessage)
+	m.SelectedImages.Clear()
+	return m, m.Message.ClearMessage(successDuration)
 }
 
 func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadCloser) {
@@ -59,14 +59,14 @@ func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadC
 		err    error
 	)
 	// @fix: this causes tui to become unresponsive for a while
-	stream, err = m.dockerClient.PullImage(imageName)
-	m.text = []string{}
+	stream, err = m.DockerClient.PullImage(imageName)
+	m.Text = []string{}
 	if err != nil {
-		m.message.AddMessage(err.Error(), message.ErrorMessage)
-		return *m, m.message.ClearMessage(errorDuration), stream
+		m.Message.AddMessage(err.Error(), message.ErrorMessage)
+		return *m, m.Message.ClearMessage(errorDuration), stream
 	}
-	m.message.AddMessage("Image pulled successfully", message.SuccessMessage)
-	return *m, m.message.ClearMessage(successDuration), stream
+	m.Message.AddMessage("Image pulled successfully", message.SuccessMessage)
+	return *m, m.Message.ClearMessage(successDuration), stream
 }
 
 func (m ImageModel) SelectImage() (ImageModel, tea.Cmd) {
@@ -74,10 +74,10 @@ func (m ImageModel) SelectImage() (ImageModel, tea.Cmd) {
 		return m, nil
 	}
 	imageID := m.Table.SelectedRow()[ImageID]
-	if m.selectedImages.Contains(imageID) {
-		m.selectedImages.Remove(imageID)
+	if m.SelectedImages.Contains(imageID) {
+		m.SelectedImages.Remove(imageID)
 	} else {
-		m.selectedImages.Add(imageID)
+		m.SelectedImages.Add(imageID)
 	}
 	m.Table.MoveDown(1)
 	return m, nil
@@ -88,11 +88,11 @@ func (m ImageModel) SelectAllImages() (ImageModel, tea.Cmd) {
 	for _, row := range m.Table.Rows() {
 		allIDs = append(allIDs, row[ImageID])
 	}
-	if m.selectedImages.Cardinality() == len(m.Table.Rows()) {
-		m.selectedImages.Clear()
+	if m.SelectedImages.Cardinality() == len(m.Table.Rows()) {
+		m.SelectedImages.Clear()
 	} else {
-		m.selectedImages.Clear()
-		m.selectedImages.Append(allIDs...)
+		m.SelectedImages.Clear()
+		m.SelectedImages.Append(allIDs...)
 	}
 	return m, nil
 }

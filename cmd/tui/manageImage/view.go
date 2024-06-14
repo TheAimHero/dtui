@@ -44,22 +44,22 @@ func (m ImageModel) View() string {
 		doc.WriteString("\n" + lipgloss.NewStyle().Padding(1, 0, 0, 0).Render(m.Input.View()))
 		doc.WriteString(strings.Repeat("\n", 14))
 	} else {
-		doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.viewport.View(), m.footerView()))
+		doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.Viewport.View(), m.footerView()))
 	}
-	doc.WriteString("\n" + m.message.ShowMessage())
-	doc.WriteString("\n" + m.help.View(m.keys))
+	doc.WriteString("\n" + m.Message.ShowMessage())
+	doc.WriteString("\n" + m.Help.View(m.Keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))
 	return doc.String()
 }
 
 func (m ImageModel) headerView() string {
 	title := titleStyle.Render("Pull Logs")
-	line := lineStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(title))))
+	line := lineStyle.Render(strings.Repeat("─", max(0, m.Viewport.Width-lipgloss.Width(title))))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
 func (m ImageModel) footerView() string {
-	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.viewport.ScrollPercent()*100))
-	line := lineStyle.Render(strings.Repeat("─", max(0, m.viewport.Width-lipgloss.Width(info))))
+	info := infoStyle.Render(fmt.Sprintf("%3.f%%", m.Viewport.ScrollPercent()*100))
+	line := lineStyle.Render(strings.Repeat("─", max(0, m.Viewport.Width-lipgloss.Width(info))))
 	return lipgloss.JoinHorizontal(lipgloss.Center, line, info)
 }

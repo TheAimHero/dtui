@@ -13,18 +13,18 @@ import (
 )
 
 type ContainerModel struct {
-	selectedContainers mapset.Set[string]
-	inProcesss         mapset.Set[string]
-	help               help.Model
-	keys               keyMap
-	dockerClient       docker.DockerClient
-	message            message.Message
-	table              table.Model
-	spinner            spinner.Model
+	SelectedContainers mapset.Set[string]
+	InProcess         mapset.Set[string]
+	Help               help.Model
+	Keys               keyMap
+	DockerClient       docker.DockerClient
+	Message            message.Message
+	Table              table.Model
+	Spinner            spinner.Model
 }
 
 func (m ContainerModel) Init() tea.Cmd {
-	return tea.Batch(utils.TickCommand(), m.spinner.Tick)
+	return tea.Batch(utils.TickCommand(), m.Spinner.Tick)
 }
 
 func NewModel(dockerClient docker.DockerClient) ContainerModel {
@@ -32,18 +32,18 @@ func NewModel(dockerClient docker.DockerClient) ContainerModel {
 	spinner := getSpinner()
 	help := getHelpSection()
 	m := ContainerModel{
-		dockerClient:       dockerClient,
-		help:               help,
-		spinner:            spinner,
-		selectedContainers: mapset.NewSet[string](),
-		inProcesss:         mapset.NewSet[string](),
-		message:            message.Message{},
-		keys:               keys,
+		DockerClient:       dockerClient,
+		Help:               help,
+		Spinner:            spinner,
+		SelectedContainers: mapset.NewSet[string](),
+		InProcess:         mapset.NewSet[string](),
+		Message:            message.Message{},
+		Keys:               keys,
 	}
-	m.table = m.getTable()
+	m.Table = m.getTable()
 	if err != nil {
-		m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
-		m.message.ClearMessage(message.SuccessDuration)
+		m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
+		m.Message.ClearMessage(message.SuccessDuration)
 	}
 	return m
 }

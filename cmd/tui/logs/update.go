@@ -19,46 +19,46 @@ func (m LogModel) Update(msg tea.Msg) (LogModel, tea.Cmd) {
 	)
 	switch msg := msg.(type) {
 	case utils.ResponseMsg:
-		m.text = append(m.text, string(msg))
-		m.viewport.SetContent(contentStyle.Render(strings.Join(m.text, "\n")))
-		m.viewport.GotoBottom()
-		cmds = append(cmds, utils.ResponseToStream(m.sub))
+		m.Text = append(m.Text, string(msg))
+		m.Viewport.SetContent(contentStyle.Render(strings.Join(m.Text, "\n")))
+		m.Viewport.GotoBottom()
+		cmds = append(cmds, utils.ResponseToStream(m.Sub))
 
 	case message.ClearMessage:
-		m.message = message.Message{}
+		m.Message = message.Message{}
 
 	case time.Time:
-		err := m.dockerClient.FetchContainers()
+		err := m.DockerClient.FetchContainers()
 		if err != nil {
-			m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
-			cmds = append(cmds, m.message.ClearMessage(message.ErrorDuration))
+			m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
+			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration))
 		}
-		tableRows := getTableRows(m.dockerClient.Containers)
-		m.table.SetRows(tableRows)
+		tableRows := getTableRows(m.DockerClient.Containers)
+		m.Table.SetRows(tableRows)
 		cmds = append(cmds, utils.TickCommand())
 
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keys.Quit):
+		case key.Matches(msg, m.Keys.Quit):
 			return m, tea.Quit
 
-		case key.Matches(msg, m.keys.Help):
-			m.help.ShowAll = !m.help.ShowAll
+		case key.Matches(msg, m.Keys.Help):
+			m.Help.ShowAll = !m.Help.ShowAll
 
-		case key.Matches(msg, m.keys.Select):
+		case key.Matches(msg, m.Keys.Select):
 			m, cmd = m.GetLogs()
-			cmds = append(cmds, cmd, utils.ListenToStream(m.sub, m.stream))
+			cmds = append(cmds, cmd, utils.ListenToStream(m.Sub, m.Stream))
 		}
 
 	case tea.WindowSizeMsg:
 		physicalWidth, _, _ = term.GetSize(int(os.Stdout.Fd()))
-		m.table = getTable(m.dockerClient.Containers)
-		m.viewport.Width = msg.Width - 20
+		m.Table = getTable(m.DockerClient.Containers)
+		m.Viewport.Width = msg.Width - 20
 	}
 
-	m.viewport, cmd = m.viewport.Update(msg)
+	m.Viewport, cmd = m.Viewport.Update(msg)
 	cmds = append(cmds, cmd)
-	m.table, cmd = m.table.Update(msg)
+	m.Table, cmd = m.Table.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
 }

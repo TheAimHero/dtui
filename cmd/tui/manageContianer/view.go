@@ -15,9 +15,9 @@ var (
 
 func (m ContainerModel) View() string {
 	doc := strings.Builder{}
-	doc.WriteString(ui_table.BaseTableStyle.Render(m.table.View()))
-	doc.WriteString("\n" + m.message.ShowMessage())
-	doc.WriteString("\n" + m.help.View(m.keys))
+	doc.WriteString(ui_table.BaseTableStyle.Render(m.Table.View()))
+	doc.WriteString("\n" + m.Message.ShowMessage())
+	doc.WriteString("\n" + m.Help.View(m.Keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))
 	return doc.String()
 }

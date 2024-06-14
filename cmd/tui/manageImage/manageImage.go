@@ -17,14 +17,14 @@ import (
 )
 
 type ImageModel struct {
-	selectedImages mapset.Set[string]
-	sub            chan utils.ResponseMsg
-	text           []string
-	viewport       viewport.Model
-	help           help.Model
-	keys           keyMap
-	dockerClient   docker.DockerClient
-	message        message.Message
+	SelectedImages mapset.Set[string]
+	Sub            chan utils.ResponseMsg
+	Text           []string
+	Viewport       viewport.Model
+	Help           help.Model
+	Keys           keyMap
+	DockerClient   docker.DockerClient
+	Message        message.Message
 	Input          textinput.Model
 	Table          table.Model
 }
@@ -33,7 +33,7 @@ func (m ImageModel) Init() tea.Cmd {
 	var (
 		cmds []tea.Cmd
 	)
-	cmds = append(cmds, utils.ResponseToStream(m.sub), utils.TickCommand())
+	cmds = append(cmds, utils.ResponseToStream(m.Sub), utils.TickCommand())
 	return tea.Batch(cmds...)
 }
 
@@ -52,17 +52,17 @@ func getTable(images docker.Images, selectedImages mapset.Set[string]) table.Mod
 func NewModel(dockerClient docker.DockerClient) ImageModel {
 	err := dockerClient.FetchImages()
 	m := ImageModel{
-		dockerClient:   dockerClient,
+		DockerClient:   dockerClient,
 		Table:          getTable(dockerClient.Images, mapset.NewSet[string]()),
-		help:           getHelpSection(),
-		viewport:       getViewPort(),
-		sub:            make(chan utils.ResponseMsg),
-		selectedImages: mapset.NewSet[string](),
-		keys:           keys,
+		Help:           getHelpSection(),
+		Viewport:       getViewPort(),
+		Sub:            make(chan utils.ResponseMsg),
+		SelectedImages: mapset.NewSet[string](),
+		Keys:           keys,
 	}
 	if err != nil {
-		m.message.AddMessage("Error while fetching images", message.ErrorMessage)
-		m.message.ClearMessage(2 * time.Second)
+		m.Message.AddMessage("Error while fetching images", message.ErrorMessage)
+		m.Message.ClearMessage(2 * time.Second)
 	}
 	return m
 }

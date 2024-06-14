@@ -10,24 +10,24 @@ func (m *LogModel) GetLogs() (LogModel, tea.Cmd) {
 		cmds []tea.Cmd
 		err  error
 	)
-	row := m.table.SelectedRow()
+	row := m.Table.SelectedRow()
 	if row == nil {
 		return *m, nil
 	}
 	containerID := row[ContainerID]
-	m.title = row[ContainerName]
-	m.text = []string{}
+	m.Title = row[ContainerName]
+	m.Text = []string{}
 	// close the previeous stream if existes
-	if m.stream != nil {
-		m.stream.Close()
+	if m.Stream != nil {
+		m.Stream.Close()
 	}
-	m.stream, err = m.dockerClient.GetLogs(containerID)
+	m.Stream, err = m.DockerClient.GetLogs(containerID)
 	if err != nil {
-		m.message.AddMessage("Error while fetching logs", message.ErrorMessage)
-		cmds = append(cmds, m.message.ClearMessage(message.ErrorDuration))
+		m.Message.AddMessage("Error while fetching logs", message.ErrorMessage)
+		cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration))
 	} else {
-		m.message.AddMessage("Logs fetched for: "+row[ContainerName], message.SuccessMessage)
-		cmds = append(cmds, m.message.ClearMessage(message.SuccessDuration))
+		m.Message.AddMessage("Logs fetched for: "+row[ContainerName], message.SuccessMessage)
+		cmds = append(cmds, m.Message.ClearMessage(message.SuccessDuration))
 	}
 	return *m, tea.Batch(cmds...)
 }

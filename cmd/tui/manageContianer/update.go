@@ -19,80 +19,80 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
-		m.table = m.getTable()
+		m.Table = m.getTable()
 
 	case message.ClearMessage:
-		m.message = message.Message{}
+		m.Message = message.Message{}
 
 	case message.Message:
-		m.message = msg
+		m.Message = msg
 		var duration time.Duration
 		if msg.MsgType == message.SuccessMessage {
 			duration = message.SuccessDuration
 		} else {
 			duration = message.ErrorDuration
 		}
-		cmds = append(cmds, m.message.ClearMessage(duration))
+		cmds = append(cmds, m.Message.ClearMessage(duration))
 
 	case time.Time:
-		err := m.dockerClient.FetchContainers()
+		err := m.DockerClient.FetchContainers()
 		if err != nil {
-			m.message.AddMessage("Error while fetching containers", message.ErrorMessage)
-			cmds = append(cmds, m.message.ClearMessage(message.ErrorDuration), utils.TickCommand())
+			m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
+			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration), utils.TickCommand())
 		}
 		tableRows := getTableRows(
-			m.dockerClient.Containers,
-			m.selectedContainers,
-			m.inProcesss,
-			m.spinner,
+			m.DockerClient.Containers,
+			m.SelectedContainers,
+			m.InProcess,
+			m.Spinner,
 		)
-		m.table.SetRows(tableRows)
+		m.Table.SetRows(tableRows)
 		cmds = append(cmds, utils.TickCommand())
 
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keys.Quit):
+		case key.Matches(msg, m.Keys.Quit):
 			return m, tea.Quit
 
-		case key.Matches(msg, m.keys.Help):
-			m.help.ShowAll = !m.help.ShowAll
+		case key.Matches(msg, m.Keys.Help):
+			m.Help.ShowAll = !m.Help.ShowAll
 
-		case key.Matches(msg, m.keys.StopContainer):
+		case key.Matches(msg, m.Keys.StopContainer):
 			m, cmd = m.StopContainer()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.StartContainer):
+		case key.Matches(msg, m.Keys.StartContainer):
 			m, cmd = m.StartContainer()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.StartContainers):
+		case key.Matches(msg, m.Keys.StartContainers):
 			m, cmd = m.StartContainers()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.StopContainers):
+		case key.Matches(msg, m.Keys.StopContainers):
 			m, cmd = m.StopContainers()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.ToggleSelected):
+		case key.Matches(msg, m.Keys.ToggleSelected):
 			m, cmd = m.SelectContainers()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.ToggleSelectAll):
+		case key.Matches(msg, m.Keys.ToggleSelectAll):
 			m, cmd = m.SelectAllContainers()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.DeleteContainer):
+		case key.Matches(msg, m.Keys.DeleteContainer):
 			m, cmd = m.DeleteContainer()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.keys.DeleteContainers):
+		case key.Matches(msg, m.Keys.DeleteContainers):
 			m, cmd = m.DeleteContainers()
 			cmds = append(cmds, cmd)
 		}
 	}
-	m.table, cmd = m.table.Update(msg)
+	m.Table, cmd = m.Table.Update(msg)
 	cmds = append(cmds, cmd)
-	m.spinner, cmd = m.spinner.Update(msg)
+	m.Spinner, cmd = m.Spinner.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
 }
