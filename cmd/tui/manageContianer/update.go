@@ -36,6 +36,7 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 	default:
 		m.Input, cmd = m.Input.Update(msg)
 		m.Table.SetRows(filterRows(m.Table.Rows(), m.Input.Value()))
+		m.Table.SetCursor(0)
 		return m, cmd
 	}
 }
