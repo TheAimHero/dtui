@@ -7,16 +7,21 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
 )
 
 type Containers []types.Container
 type Images []image.Summary
 
+// type Volumes []volume.Volume
+type Volumes []*volume.Volume
+
 type DockerClient struct {
 	client     *client.Client
 	Containers Containers
 	Images     Images
+	Volumes    Volumes
 }
 
 func NewDockerClient() (DockerClient, error) {

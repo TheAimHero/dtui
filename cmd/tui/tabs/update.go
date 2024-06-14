@@ -16,6 +16,11 @@ func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Sequence(m.ImageTab.Init(), cmd)
 
 	case ImageTab:
+		m.ActiveTab = VolumeTab
+		m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+		return m, tea.Sequence(m.VolumeTab.Init(), cmd)
+
+	case VolumeTab:
 		m.ActiveTab = LogsTab
 		m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.LogsTab.Init(), cmd)
@@ -45,10 +50,15 @@ func (m MainModel) getPrevTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 		m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ContainerTab.Init(), cmd)
 
-	case LogsTab:
+	case VolumeTab:
 		m.ActiveTab = ImageTab
 		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ImageTab.Init(), cmd)
+
+	case LogsTab:
+		m.ActiveTab = VolumeTab
+		m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+		return m, tea.Sequence(m.VolumeTab.Init(), cmd)
 
 	default:
 		m.ActiveTab = LogsTab
@@ -65,6 +75,9 @@ func (m MainModel) updateCurrentTab(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case ImageTab:
 		m.ImageTab, cmd = m.ImageTab.Update(msg)
+
+	case VolumeTab:
+		m.VolumeTab, cmd = m.VolumeTab.Update(msg)
 
 	case LogsTab:
 		m.LogsTab, cmd = m.LogsTab.Update(msg)
@@ -108,6 +121,14 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 
 		case "3":
+			m.ActiveTab = VolumeTab
+			m.VolumeTab, cmd = m.VolumeTab.Update(msg)
+			cmds = append(cmds, cmd)
+			m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
+
+		case "4":
 			m.ActiveTab = LogsTab
 			m.LogsTab, cmd = m.LogsTab.Update(msg)
 			cmds = append(cmds, cmd)
@@ -115,7 +136,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
 
-		case "4":
+		case "5":
 			m.ActiveTab = WipTab
 			m.WipTab, cmd = m.WipTab.Update(msg)
 			cmds = append(cmds, cmd)

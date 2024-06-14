@@ -19,7 +19,7 @@ func filterRows(rows []table.Row, filter string) []table.Row {
 	}
 	var filteredRows []table.Row
 	for _, row := range rows {
-		if strings.Contains(row[ContainerName], filter) || strings.Contains(row[ContainerID], filter) {
+		if strings.Contains(row[ContainerName], filter) {
 			filteredRows = append(filteredRows, row)
 		}
 	}
