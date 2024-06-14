@@ -8,7 +8,7 @@ import (
 )
 
 func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd  tea.Cmd
+	var cmd tea.Cmd
 	switch m.ActiveTab {
 	case ContainerTab:
 		m.ActiveTab = ImageTab
@@ -82,6 +82,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 	if m.ImageTab.Input.Focused() {
 		m.ImageTab, cmd = m.ImageTab.Update(msg)
+		return m, cmd
+	}
+	if m.ContainerTab.Input.Focused() {
+		m.ContainerTab, cmd = m.ContainerTab.Update(msg)
 		return m, cmd
 	}
 	switch msg := msg.(type) {

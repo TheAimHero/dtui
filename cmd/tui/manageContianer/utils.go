@@ -6,11 +6,25 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/textinput"
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 )
+
+func filterRows(rows []table.Row, filter string) []table.Row {
+	if filter == "" {
+		return rows
+	}
+	var filteredRows []table.Row
+	for _, row := range rows {
+		if strings.Contains(row[ContainerName], filter) || strings.Contains(row[ContainerID], filter) {
+			filteredRows = append(filteredRows, row)
+		}
+	}
+	return filteredRows
+}
 
 func getTableRows(containers docker.Containers, selectedContainers mapset.Set[string], inProcesss mapset.Set[string], spinner spinner.Model) []table.Row {
 	tableRows := []table.Row{}
@@ -68,4 +82,11 @@ func getSpinner() spinner.Model {
 	s.Spinner = spinner.Points
 	s.Spinner.FPS = 300 * time.Millisecond
 	return s
+}
+
+func getInput() textinput.Model {
+	ip := textinput.New()
+	ip.Placeholder = "Container Name"
+	ip.Prompt = "Container Filter: "
+	return ip
 }

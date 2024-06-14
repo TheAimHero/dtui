@@ -27,6 +27,9 @@ type keyMap struct {
 	DeleteContainers key.Binding
 	ToggleSelected   key.Binding
 	ToggleSelectAll  key.Binding
+	ShowInput        key.Binding
+	EscapeInput      key.Binding
+	SetFilter        key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -42,6 +45,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.StartContainers, k.StopContainers},
 		{k.DeleteContainer, k.DeleteContainers},
 		{k.ToggleSelected, k.ToggleSelectAll},
+		{k.ShowInput, k.EscapeInput, k.SetFilter},
 	}
 }
 
@@ -101,6 +105,20 @@ var keys = keyMap{
 	ToggleSelectAll: key.NewBinding(
 		key.WithKeys("V"),
 		key.WithHelp("V", "toggle select all"),
+	),
+	ShowInput: key.NewBinding(
+		key.WithKeys("/"),
+		key.WithHelp("/", "show input"),
+	),
+	EscapeInput: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "escape input"),
+		key.WithDisabled(),
+	),
+	SetFilter: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "set filter"),
+		key.WithDisabled(),
 	),
 }
 

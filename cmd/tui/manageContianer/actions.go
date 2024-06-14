@@ -6,6 +6,7 @@ import (
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
+	mapset "github.com/deckarep/golang-set/v2"
 )
 
 const (
@@ -63,15 +64,23 @@ func (m ContainerModel) StopContainer() (ContainerModel, tea.Cmd) {
 
 func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
 	startMsg := message.Message{}
-	selectedContainers := m.SelectedContainers.ToSlice()
 	defer m.ClearSelectedContainers()
 	errors := make([]string, 0)
-	if len(selectedContainers) == 0 {
+	if m.SelectedContainers.Cardinality() == 0 {
 		m.Message.AddMessage("No containers selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
+	tableContainers := mapset.NewSet[string]()
+	for _, row := range m.Table.Rows() {
+		tableContainers.Add(row[ContainerID])
+	}
+	toStart := tableContainers.Intersect(m.SelectedContainers).ToSlice()
+  if len(toStart) == 0 {
+    m.Message.AddMessage("No containers selected", message.InfoMessage)
+    return m, m.Message.ClearMessage(message.InfoDuration)
+  }
 	return m, func() tea.Msg {
-		for _, containerID := range selectedContainers {
+		for _, containerID := range toStart {
 			go func(containerID string) {
 				m.InProcess.Add(containerID)
 				err := m.DockerClient.StartContainer(containerID)
@@ -96,6 +105,19 @@ func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 	errors := make([]string, 0)
 	selectedContainers := m.SelectedContainers.ToSlice()
 	stopMsg := message.Message{}
+	if m.SelectedContainers.Cardinality() == 0 {
+		m.Message.AddMessage("No containers selected", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+  tableContainers := mapset.NewSet[string]()
+  for _, row := range m.Table.Rows() {
+    tableContainers.Add(row[ContainerID])
+  }
+  toStop := tableContainers.Intersect(m.SelectedContainers).ToSlice()
+  if len(toStop) == 0 {
+    m.Message.AddMessage("No containers selected", message.InfoMessage)
+    return m, m.Message.ClearMessage(message.InfoDuration)
+  }
 	defer m.ClearSelectedContainers()
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
@@ -171,15 +193,24 @@ func (m ContainerModel) DeleteContainer() (ContainerModel, tea.Cmd) {
 
 func (m ContainerModel) DeleteContainers() (ContainerModel, tea.Cmd) {
 	defer m.ClearSelectedContainers()
-	selectedContainers := m.SelectedContainers.ToSlice()
-	if len(selectedContainers) == 0 {
+	tableContainers := mapset.NewSet[string]()
+	rows := m.Table.Rows()
+	for _, row := range rows {
+		tableContainers.Add(row[ContainerID])
+	}
+	if m.SelectedContainers.Cardinality() == 0 {
 		m.Message.AddMessage("No containers selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
+	toDelete := tableContainers.Intersect(m.SelectedContainers).ToSlice()
+  if len(toDelete) == 0 {
+    m.Message.AddMessage("No containers selected", message.InfoMessage)
+    return m, m.Message.ClearMessage(message.InfoDuration)
+  }
 	deleteMsg := message.Message{}
 	errors := make([]string, 0)
 	return m, func() tea.Msg {
-		for _, containerID := range selectedContainers {
+		for _, containerID := range toDelete {
 			go func(containerID string) {
 				m.InProcess.Add(containerID)
 				err := m.DockerClient.DeleteContainer(containerID)

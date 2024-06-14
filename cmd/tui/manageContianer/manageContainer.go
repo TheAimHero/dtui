@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
 
@@ -14,11 +15,12 @@ import (
 
 type ContainerModel struct {
 	SelectedContainers mapset.Set[string]
-	InProcess         mapset.Set[string]
+	InProcess          mapset.Set[string]
 	Help               help.Model
 	Keys               keyMap
 	DockerClient       docker.DockerClient
 	Message            message.Message
+	Input              textinput.Model
 	Table              table.Model
 	Spinner            spinner.Model
 }
@@ -31,14 +33,16 @@ func NewModel(dockerClient docker.DockerClient) ContainerModel {
 	err := dockerClient.FetchContainers()
 	spinner := getSpinner()
 	help := getHelpSection()
+	input := getInput()
 	m := ContainerModel{
 		DockerClient:       dockerClient,
 		Help:               help,
 		Spinner:            spinner,
 		SelectedContainers: mapset.NewSet[string](),
-		InProcess:         mapset.NewSet[string](),
+		InProcess:          mapset.NewSet[string](),
 		Message:            message.Message{},
 		Keys:               keys,
+		Input:              input,
 	}
 	m.Table = m.getTable()
 	if err != nil {

@@ -7,9 +7,38 @@ import (
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
 )
+
+func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg.String() {
+	case "esc":
+		m.Table.Focus()
+		m.Input = textinput.Model{}
+		m.Table, cmd = m.Table.Update(msg)
+		m.Keys.ShowInput.SetEnabled(true)
+		m.Keys.EscapeInput.SetEnabled(false)
+		m.Keys.SetFilter.SetEnabled(false)
+		return m, cmd
+
+	case "enter":
+		m.Table.Focus()
+		m.Input.Blur()
+		m.Keys.ShowInput.SetEnabled(true)
+		m.Keys.EscapeInput.SetEnabled(false)
+		m.Keys.SetFilter.SetEnabled(false)
+		return m, cmd
+
+	default:
+		m.Input, cmd = m.Input.Update(msg)
+		m.Table.SetRows(filterRows(m.Table.Rows(), m.Input.Value()))
+		return m, cmd
+	}
+}
 
 func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 	var (
@@ -46,10 +75,14 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 			m.InProcess,
 			m.Spinner,
 		)
-		m.Table.SetRows(tableRows)
-		cmds = append(cmds, utils.TickCommand())
+		m.Table.SetRows(filterRows(tableRows, m.Input.Value()))
+		m.Input, cmd = m.Input.Update(msg)
+		cmds = append(cmds, utils.TickCommand(), tea.Println(m.Input.Value()), cmd)
 
 	case tea.KeyMsg:
+		if m.Input.Focused() {
+			return m.updateInput(msg)
+		}
 		switch {
 		case key.Matches(msg, m.Keys.Quit):
 			return m, tea.Quit
@@ -88,6 +121,13 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 		case key.Matches(msg, m.Keys.DeleteContainers):
 			m, cmd = m.DeleteContainers()
 			cmds = append(cmds, cmd)
+
+		case key.Matches(msg, m.Keys.ShowInput):
+			m.Input = getInput()
+			m.Keys.ShowInput.SetEnabled(false)
+			m.Keys.EscapeInput.SetEnabled(true)
+			m.Keys.SetFilter.SetEnabled(true)
+			cmds = append(cmds, m.Input.Focus())
 		}
 	}
 	m.Table, cmd = m.Table.Update(msg)
