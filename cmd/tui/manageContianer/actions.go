@@ -25,8 +25,8 @@ func (m ContainerModel) StartContainer() (ContainerModel, tea.Cmd) {
 	startMsg := message.Message{}
 	row := m.table.SelectedRow()
 	if row == nil {
-		m.message.AddMessage("No container selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(message.ErrorDuration)
+		m.message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.message.ClearMessage(message.InfoDuration)
 	}
 	m.inProcesss.Add(row[ContainerID])
 	return m, func() tea.Msg {
@@ -45,8 +45,8 @@ func (m ContainerModel) StopContainer() (ContainerModel, tea.Cmd) {
 	stopMsg := message.Message{}
 	row := m.table.SelectedRow()
 	if row == nil {
-		m.message.AddMessage("No container selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(message.ErrorDuration)
+		m.message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.message.ClearMessage(message.InfoDuration)
 	}
 	m.inProcesss.Add(row[ContainerID])
 	return m, func() tea.Msg {
@@ -67,8 +67,8 @@ func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
 	defer m.ClearSelectedContainers()
 	errors := make([]string, 0)
 	if len(selectedContainers) == 0 {
-		m.message.AddMessage("No containers selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(message.ErrorDuration)
+		m.message.AddMessage("No containers selected", message.InfoMessage)
+		return m, m.message.ClearMessage(message.InfoDuration)
 	}
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
@@ -94,6 +94,7 @@ func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 	errors := make([]string, 0)
 	selectedContainers := m.selectedContainers.ToSlice()
 	stopMsg := message.Message{}
+  defer m.ClearSelectedContainers()
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
 			m.inProcesss.Add(containerID)
@@ -115,7 +116,12 @@ func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 }
 
 func (m ContainerModel) SelectContainers() (ContainerModel, tea.Cmd) {
-	containerID := m.table.SelectedRow()[ContainerID]
+	row := m.table.SelectedRow()
+	if row == nil {
+		m.message.AddMessage("No containers to select", message.InfoMessage)
+		return m, m.message.ClearMessage(message.InfoDuration)
+	}
+	containerID := row[ContainerID]
 	if m.selectedContainers.Contains(containerID) {
 		m.selectedContainers.Remove(containerID)
 	} else {
@@ -143,8 +149,8 @@ func (m ContainerModel) DeleteContainer() (ContainerModel, tea.Cmd) {
 	deleteMsg := message.Message{}
 	row := m.table.SelectedRow()
 	if row == nil {
-		m.message.AddMessage("No container selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(message.ErrorDuration)
+		m.message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.message.ClearMessage(message.InfoDuration)
 	}
 	return m, func() tea.Msg {
 		m.inProcesss.Add(row[ContainerID])
@@ -163,8 +169,8 @@ func (m ContainerModel) DeleteContainers() (ContainerModel, tea.Cmd) {
 	defer m.ClearSelectedContainers()
 	selectedContainers := m.selectedContainers.ToSlice()
 	if len(selectedContainers) == 0 {
-		m.message.AddMessage("No containers selected", message.ErrorMessage)
-		return m, m.message.ClearMessage(message.ErrorDuration)
+		m.message.AddMessage("No containers selected", message.InfoMessage)
+		return m, m.message.ClearMessage(message.InfoDuration)
 	}
 	deleteMsg := message.Message{}
 	errors := make([]string, 0)

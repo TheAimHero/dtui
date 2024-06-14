@@ -15,11 +15,13 @@ type Message struct {
 const (
 	ErrorMessage = iota
 	SuccessMessage
+	InfoMessage
 )
 
 const (
 	ErrorDuration   = 5 * time.Second
 	SuccessDuration = 2 * time.Second
+	InfoDuration    = 2 * time.Second
 )
 
 type ClearMessage struct{}
@@ -28,6 +30,7 @@ var (
 	msgStyle     = lipgloss.NewStyle().Padding(1, 0)
 	errStyle     = msgStyle.Copy().Foreground(lipgloss.Color("#cb4154"))
 	successStyle = msgStyle.Copy().Foreground(lipgloss.Color("#AADB1E"))
+	infoStyle    = msgStyle.Copy().Foreground(lipgloss.Color("#A4DBE8"))
 )
 
 func (msg *Message) AddMessage(value string, messageType int) {
@@ -41,6 +44,8 @@ func (msg *Message) ShowMessage() string {
 		return errStyle.Render(msg.Value)
 	case SuccessMessage:
 		return successStyle.Render(msg.Value)
+	case InfoMessage:
+		return infoStyle.Render(msg.Value)
 	}
 
 	return msgStyle.Render("")
