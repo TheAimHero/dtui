@@ -72,12 +72,14 @@ func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
 	}
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
-			m.inProcesss.Add(containerID)
-			err := m.dockerClient.StartContainer(containerID)
-			if err != nil {
-				errors = append(errors, err.Error())
-			}
-			m.inProcesss.Remove(containerID)
+			go func(containerID string) {
+				m.inProcesss.Add(containerID)
+				err := m.dockerClient.StartContainer(containerID)
+				if err != nil {
+					errors = append(errors, err.Error())
+				}
+				m.inProcesss.Remove(containerID)
+			}(containerID)
 		}
 		if len(errors) > 0 {
 			startMsg.AddMessage("Error while starting some containers", message.ErrorMessage)
@@ -94,15 +96,17 @@ func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 	errors := make([]string, 0)
 	selectedContainers := m.selectedContainers.ToSlice()
 	stopMsg := message.Message{}
-  defer m.ClearSelectedContainers()
+	defer m.ClearSelectedContainers()
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
-			m.inProcesss.Add(containerID)
-			err := m.dockerClient.StopContainer(containerID)
-			if err != nil {
-				errors = append(errors, err.Error())
-			}
-			m.inProcesss.Remove(containerID)
+			go func(containerID string) {
+				m.inProcesss.Add(containerID)
+				err := m.dockerClient.StopContainer(containerID)
+				if err != nil {
+					errors = append(errors, err.Error())
+				}
+				m.inProcesss.Remove(containerID)
+			}(containerID)
 		}
 		if len(errors) > 0 {
 			stopMsg.AddMessage("Error while stopping some containers", message.ErrorMessage)
@@ -176,12 +180,14 @@ func (m ContainerModel) DeleteContainers() (ContainerModel, tea.Cmd) {
 	errors := make([]string, 0)
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
-			m.inProcesss.Add(containerID)
-			err := m.dockerClient.DeleteContainer(containerID)
-			if err != nil {
-				errors = append(errors, err.Error())
-			}
-			m.inProcesss.Remove(containerID)
+			go func(containerID string) {
+				m.inProcesss.Add(containerID)
+				err := m.dockerClient.DeleteContainer(containerID)
+				if err != nil {
+					errors = append(errors, err.Error())
+				}
+				m.inProcesss.Remove(containerID)
+			}(containerID)
 		}
 		if len(errors) > 0 {
 			deleteMsg.AddMessage("Error while deleting some containers", message.ErrorMessage)
