@@ -27,6 +27,7 @@ type keyMap struct {
 	ShowInput        key.Binding
 	EscapeInput      key.Binding
 	SetFilter        key.Binding
+	ShowLogs         key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -41,7 +42,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.StartContainers, k.StopContainers},
 		{k.DeleteContainers, k.SetFilter},
 		{k.ToggleSelected, k.ToggleSelectAll},
-		{k.ShowInput, k.EscapeInput},
+		{k.ShowInput, k.EscapeInput, k.ShowLogs},
 	}
 }
 
@@ -103,6 +104,10 @@ var keys = keyMap{
 		key.WithKeys("enter"),
 		key.WithHelp("enter", "set filter"),
 		key.WithDisabled(),
+	),
+	ShowLogs: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "show logs"),
 	),
 }
 

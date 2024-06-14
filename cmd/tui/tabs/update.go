@@ -21,11 +21,6 @@ func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Sequence(m.VolumeTab.Init(), cmd)
 
 	case VolumeTab:
-		m.ActiveTab = LogsTab
-		m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.LogsTab.Init(), cmd)
-
-	case LogsTab:
 		m.ActiveTab = WipTab
 		m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.WipTab.Init(), cmd)
@@ -55,15 +50,11 @@ func (m MainModel) getPrevTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.ImageTab.Init(), cmd)
 
-	case LogsTab:
+	default:
 		m.ActiveTab = VolumeTab
 		m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 		return m, tea.Sequence(m.VolumeTab.Init(), cmd)
 
-	default:
-		m.ActiveTab = LogsTab
-		m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.LogsTab.Init(), cmd)
 	}
 }
 
@@ -78,9 +69,6 @@ func (m MainModel) updateCurrentTab(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case VolumeTab:
 		m.VolumeTab, cmd = m.VolumeTab.Update(msg)
-
-	case LogsTab:
-		m.LogsTab, cmd = m.LogsTab.Update(msg)
 
 	default:
 		m.WipTab, cmd = m.WipTab.Update(msg)
@@ -129,14 +117,6 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Batch(cmds...)
 
 		case "4":
-			m.ActiveTab = LogsTab
-			m.LogsTab, cmd = m.LogsTab.Update(msg)
-			cmds = append(cmds, cmd)
-			m.LogsTab, cmd = m.LogsTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-			cmds = append(cmds, cmd)
-			return m, tea.Batch(cmds...)
-
-		case "5":
 			m.ActiveTab = WipTab
 			m.WipTab, cmd = m.WipTab.Update(msg)
 			cmds = append(cmds, cmd)
@@ -151,7 +131,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.getPrevTab(msg)
 
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tea.Sequence(tea.Quit)
 
 		default:
 			return m.updateCurrentTab(msg)

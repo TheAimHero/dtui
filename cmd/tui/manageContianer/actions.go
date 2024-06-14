@@ -191,7 +191,6 @@ func (m ContainerModel) DeleteContainers() (ContainerModel, tea.Cmd) {
 			deleteMsg.AddMessage("Error while deleting some containers", message.ErrorMessage)
 			m.SelectedContainers.Clear()
 			return deleteMsg
-
 		}
 		m.SelectedContainers.Clear()
 		deleteMsg.AddMessage("Containers deleted", message.SuccessMessage)

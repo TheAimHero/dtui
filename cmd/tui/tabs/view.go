@@ -13,7 +13,6 @@ const (
 	ContainerTab = iota
 	ImageTab
 	VolumeTab
-	LogsTab
 	WipTab
 )
 
@@ -54,8 +53,6 @@ func TabView(m MainModel) string {
 		return m.ImageTab.View()
 	case VolumeTab:
 		return m.VolumeTab.View()
-	case LogsTab:
-		return m.LogsTab.View()
 	case WipTab:
 		return m.WipTab.View()
 	default:

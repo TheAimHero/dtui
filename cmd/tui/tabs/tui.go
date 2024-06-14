@@ -1,7 +1,6 @@
 package tabs
 
 import (
-	logs "github.com/TheAimHero/dtui/cmd/tui/logs"
 	managecontianer "github.com/TheAimHero/dtui/cmd/tui/manageContianer"
 	manageimage "github.com/TheAimHero/dtui/cmd/tui/manageImage"
 	managevolume "github.com/TheAimHero/dtui/cmd/tui/manageVolume"
@@ -14,7 +13,6 @@ type MainModel struct {
 	WipTab       wip.WipModel
 	DockerClient docker.DockerClient
 	TabsTitle    []string
-	LogsTab      logs.LogModel
 	ContainerTab managecontianer.ContainerModel
 	VolumeTab    managevolume.VolumeModel
 	ImageTab     manageimage.ImageModel
@@ -22,20 +20,18 @@ type MainModel struct {
 }
 
 func (m MainModel) Init() tea.Cmd {
-	return tea.Batch(m.ContainerTab.Init(), m.ImageTab.Init(), m.LogsTab.Init(), m.WipTab.Init())
+	return tea.Batch(m.ContainerTab.Init(), m.ImageTab.Init(), m.WipTab.Init())
 }
 
 func NewModel(dockerClient docker.DockerClient) tea.Model {
 	containerModel := managecontianer.NewModel(dockerClient)
 	imageModel := manageimage.NewModel(dockerClient)
-	logsModel := logs.NewModel(dockerClient)
 	volumeModel := managevolume.NewModel(dockerClient)
 	wipModel := wip.NewModel()
 	model := MainModel{
-		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "View Logs", "Work In Progress"},
+		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "Work In Progress"},
 		ContainerTab: containerModel,
 		ImageTab:     imageModel,
-		LogsTab:      logsModel,
 		WipTab:       wipModel,
 		VolumeTab:    volumeModel,
 		DockerClient: dockerClient,
