@@ -41,9 +41,9 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Up, k.Down},
 		{k.Left, k.Right},
 		{k.StartContainers, k.StopContainers},
-		{k.DeleteContainers, k.SetFilter},
+		{k.DeleteContainers},
 		{k.ToggleSelected, k.ToggleSelectAll},
-		{k.ShowInput, k.EscapeInput, k.ShowLogs},
+		{k.ShowInput, k.EscapeInput, k.ShowLogs, k.SetFilter},
 		{k.ExecContainer},
 	}
 }

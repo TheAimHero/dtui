@@ -31,6 +31,7 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 		m.Keys.ShowInput.SetEnabled(true)
 		m.Keys.EscapeInput.SetEnabled(false)
 		m.Keys.SetFilter.SetEnabled(false)
+		m.Keys.ShowLogs.SetEnabled(true)
 		return m, cmd
 
 	default:
@@ -120,6 +121,7 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 		case key.Matches(msg, m.Keys.ShowInput):
 			m.Input = getInput()
 			m.Keys.ShowInput.SetEnabled(false)
+			m.Keys.ShowLogs.SetEnabled(false)
 			m.Keys.EscapeInput.SetEnabled(true)
 			m.Keys.SetFilter.SetEnabled(true)
 			cmds = append(cmds, m.Input.Focus())
