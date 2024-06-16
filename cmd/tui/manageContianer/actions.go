@@ -2,11 +2,13 @@ package managecontianer
 
 import (
 	"fmt"
+	"os/exec"
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
+	"github.com/docker/docker/api/types"
 )
 
 const (
@@ -226,4 +228,45 @@ func (m ContainerModel) SelectAllContainers() (ContainerModel, tea.Cmd) {
 		m.SelectedContainers.Append(allIDs...)
 	}
 	return m, nil
+}
+
+func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
+	row := m.Table.SelectedRow()
+	if row == nil {
+		m.Message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	containerID := row[ContainerID]
+	if containerID == "" {
+		m.Message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	var container types.Container
+	for _, c := range m.DockerClient.Containers {
+		if c.ID == containerID {
+			container = c
+			break
+		}
+	}
+	if container.State != "running" {
+		m.Message.AddMessage("Container is not running", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh")
+	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
+}
+
+func (m ContainerModel) ShowLogs() (ContainerModel, tea.Cmd) {
+	row := m.Table.SelectedRow()
+	if row == nil {
+		m.Message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	containerID := row[ContainerID]
+	if containerID == "" {
+		m.Message.AddMessage("No container selected", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	c := exec.Command("docker", "logs", containerID, "--follow")
+	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }

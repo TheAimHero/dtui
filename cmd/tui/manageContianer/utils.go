@@ -1,14 +1,12 @@
 package managecontianer
 
 import (
-	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
@@ -93,12 +91,4 @@ func getInput() textinput.Model {
 	return ip
 }
 
-func showLogs(containerID string) tea.Cmd {
-	c := exec.Command("docker", "logs", containerID, "--follow")
-	return tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
-}
 
-func execContainer(containerID string) tea.Cmd {
-	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh")
-	return tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
-}
