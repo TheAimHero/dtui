@@ -18,8 +18,8 @@ const (
 func deleteImage(m ImageModel) (ImageModel, tea.Cmd) {
 	row := m.Table.SelectedRow()
 	if row == nil {
-		m.Message.AddMessage("No image selected", message.ErrorMessage)
-		return m, m.Message.ClearMessage(errorDuration)
+		m.Message.AddMessage("No image to delete", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
 
 	err := m.DockerClient.DeleteImage(row[ImageID])
