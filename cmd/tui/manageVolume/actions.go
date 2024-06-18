@@ -27,6 +27,7 @@ func (m VolumeModel) PruneVolume() (VolumeModel, tea.Cmd) {
 			return deleteMsg
 		}
 		deleteMsg.AddMessage("Volumes Pruned", message.SuccessMessage)
+    m.Table.SetCursor(0)
 		return deleteMsg
 	}
 }

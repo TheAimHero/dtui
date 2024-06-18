@@ -76,7 +76,7 @@ func (m ImageModel) PruneImages() (ImageModel, tea.Cmd) {
 		return m, m.Message.ClearMessage(errorDuration)
 	}
 	m.Message.AddMessage("Images pruned", message.SuccessMessage)
-	m.SelectedImages.Clear()
+	m.Table.SetCursor(0)
 	return m, m.Message.ClearMessage(successDuration)
 }
 
