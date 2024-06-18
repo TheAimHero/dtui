@@ -35,8 +35,7 @@ func getTableRows(volumes docker.Volumes, selectedVolumes mapset.Set[string]) []
 		tableRows = append(tableRows, table.Row{
 			selected,
 			v.Name,
-			// @todo: format time properly
-			v.CreatedAt,
+			utils.GetDate(v.CreatedAt),
 			v.Mountpoint,
 			volSize,
 		})

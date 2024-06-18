@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/araddon/dateparse"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -79,3 +80,7 @@ func GetSize(bytes int64) string {
 	return fmt.Sprintf("%.2f%s", size, unit)
 }
 
+func GetDate(dateStr string) string {
+	date, _ := dateparse.ParseAny(dateStr)
+	return date.Format("02/01/2006 15:04 MST")
+}
