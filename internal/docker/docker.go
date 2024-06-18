@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/docker/docker/api/types"
@@ -29,7 +30,9 @@ func NewDockerClient() (DockerClient, error) {
 	if err != nil {
 		return DockerClient{}, err
 	}
-	_, err = client.Ping(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_, err = client.Ping(ctx)
 	if err != nil {
 		return DockerClient{}, errors.New(lipgloss.NewStyle().
 			Foreground(lipgloss.Color("#cb4154")).
