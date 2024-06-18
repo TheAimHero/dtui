@@ -1,6 +1,7 @@
 package managevolume
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/docker"
@@ -15,6 +16,7 @@ func getTableRows(volumes docker.Volumes, selectedVolumes mapset.Set[string]) []
 	if len(volumes) == 0 {
 		return tableRows
 	}
+	sort.SliceStable(volumes, func(i, j int) bool { return volumes[i].Name > volumes[j].Name })
 	for _, v := range volumes {
 		var (
 			selected string
