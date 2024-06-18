@@ -3,14 +3,17 @@ package docker
 import (
 	"context"
 
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/volume"
 )
 
 func (m *DockerClient) FetchVolumes() error {
 	volumes, err := m.client.VolumeList(context.Background(), volume.ListOptions{})
 	m.Volumes = volumes.Volumes
-	// for _, volume := range volumes.Volumes {
-	// 	m.Volumes = append(m.Volumes, *volume)
-	// }
+	return err
+}
+
+func (m *DockerClient) PruneVolume() error {
+	_, err := m.client.VolumesPrune(context.Background(), filters.NewArgs())
 	return err
 }

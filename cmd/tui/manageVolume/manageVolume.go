@@ -35,7 +35,7 @@ func NewModel(dockerClient docker.DockerClient) VolumeModel {
 	}
 	m.Table = m.getTable()
 	if err != nil {
-		m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
+		m.Message.AddMessage("Error while fetching volumes", message.ErrorMessage)
 		m.Message.ClearMessage(message.SuccessDuration)
 	}
 	return m

@@ -35,9 +35,9 @@ func (m VolumeModel) Update(msg tea.Msg) (VolumeModel, tea.Cmd) {
 		cmds = append(cmds, m.Message.ClearMessage(duration))
 
 	case time.Time:
-		err := m.DockerClient.FetchContainers()
+		err := m.DockerClient.FetchVolumes()
 		if err != nil {
-			m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
+			m.Message.AddMessage("Error while fetching volumes", message.ErrorMessage)
 			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration), utils.TickCommand())
 		}
 		tableRows := getTableRows(
@@ -45,7 +45,6 @@ func (m VolumeModel) Update(msg tea.Msg) (VolumeModel, tea.Cmd) {
 			m.SelectedVolumes,
 		)
 		m.Table.SetRows(tableRows)
-		// m.Table.SetRows(filterRows(tableRows, m.Input.Value()))
 		cmds = append(cmds, utils.TickCommand(), cmd)
 
 	case tea.KeyMsg:
@@ -56,6 +55,9 @@ func (m VolumeModel) Update(msg tea.Msg) (VolumeModel, tea.Cmd) {
 		case key.Matches(msg, m.Keys.Help):
 			m.Help.ShowAll = !m.Help.ShowAll
 
+		case key.Matches(msg, m.Keys.PruneVolume):
+			m, cmd = m.PruneVolume()
+			cmds = append(cmds, cmd)
 		}
 	}
 	m.Table, cmd = m.Table.Update(msg)
