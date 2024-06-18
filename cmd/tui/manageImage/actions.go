@@ -68,6 +68,18 @@ func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadC
 	return *m, m.Message.ClearMessage(successDuration), stream
 }
 
+func (m ImageModel) PruneImages() (ImageModel, tea.Cmd) {
+	err := m.DockerClient.PruneImage()
+	if err != nil {
+		m.Message.AddMessage("Error while pruning some images", message.ErrorMessage)
+		m.SelectedImages.Clear()
+		return m, m.Message.ClearMessage(errorDuration)
+	}
+	m.Message.AddMessage("Images pruned", message.SuccessMessage)
+	m.SelectedImages.Clear()
+	return m, m.Message.ClearMessage(successDuration)
+}
+
 func (m ImageModel) SelectImage() (ImageModel, tea.Cmd) {
 	if len(m.Table.Rows()) == 0 {
 		return m, nil

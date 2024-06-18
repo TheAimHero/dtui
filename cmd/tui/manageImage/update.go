@@ -116,6 +116,10 @@ func (m ImageModel) Update(msg tea.Msg) (ImageModel, tea.Cmd) {
 			m, cmd = m.DeleteImages()
 			cmds = append(cmds, cmd)
 
+		case key.Matches(msg, m.Keys.PruneImages):
+			m, cmd = m.PruneImages()
+			cmds = append(cmds, cmd)
+
 		case key.Matches(msg, m.Keys.ShowInput):
 			m.Input = getInput()
 			m.Keys.ShowInput.SetEnabled(false)
