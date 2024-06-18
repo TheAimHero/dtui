@@ -2,10 +2,21 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+)
+
+const (
+	_  = iota
+	KB = 1 << (10 * iota)
+	MB
+	GB
+	TB
+	PB
+	EB
 )
 
 type ResponseMsg string
@@ -39,3 +50,32 @@ func ResponseToStream(sub chan ResponseMsg) tea.Cmd {
 		return ResponseMsg(<-sub)
 	}
 }
+
+func GetSize(bytes int64) string {
+	size := float64(bytes)
+	unit := ""
+	switch {
+	case size < KB:
+		unit = "B"
+	case size < MB:
+		size /= KB
+		unit = "KB"
+	case size < GB:
+		size /= MB
+		unit = "MB"
+	case size < TB:
+		size /= GB
+		unit = "GB"
+	case size < PB:
+		size /= TB
+		unit = "TB"
+	case size < EB:
+		size /= PB
+		unit = "PB"
+	default:
+		size /= EB
+		unit = "EB"
+	}
+	return fmt.Sprintf("%.2f%s", size, unit)
+}
+

@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/size"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/table"
 	mapset "github.com/deckarep/golang-set/v2"
 )
@@ -28,7 +28,7 @@ func getTableRows(volumes docker.Volumes, selectedVolumes mapset.Set[string]) []
 			selected = "  "
 		}
 		if v.UsageData != nil {
-			volSize = size.GetSize(v.UsageData.Size)
+			volSize = utils.GetSize(v.UsageData.Size)
 		} else {
 			volSize = "Not Available"
 		}

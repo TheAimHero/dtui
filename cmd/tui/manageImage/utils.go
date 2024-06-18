@@ -9,7 +9,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/size"
+	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 func getViewPort() viewport.Model {
@@ -43,7 +43,7 @@ func getTableRows(images docker.Images, selectedRows mapset.Set[string]) []table
 			image.ID,
 			tag,
 			time.Unix(image.Created, 0).Format("02/01/2006 15:04 MST"),
-			size.GetSize(image.Size),
+			utils.GetSize(image.Size),
 		})
 	}
 	return tableRows
