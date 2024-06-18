@@ -22,8 +22,6 @@ var (
 
 	lineStyle = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
 
-	contentStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#F8F8F2"))
-
 	titleStyle = func() lipgloss.Style {
 		b := lipgloss.NormalBorder()
 		b.Right = "├"
@@ -40,12 +38,7 @@ var (
 func (m ImageModel) View() string {
 	doc := strings.Builder{}
 	doc.WriteString(ui_table.BaseTableStyle.Render(m.Table.View()))
-	if m.Input.Focused() {
-		doc.WriteString("\n" + lipgloss.NewStyle().Padding(1, 0, 0, 0).Render(m.Input.View()))
-		doc.WriteString(strings.Repeat("\n", 14))
-	} else {
-		doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.Viewport.View(), m.footerView()))
-	}
+	doc.WriteString(fmt.Sprintf("\n%s\n%s\n%s", m.headerView(), m.Viewport.View(), m.footerView()))
 	doc.WriteString("\n" + m.Message.ShowMessage())
 	doc.WriteString("\n" + m.Help.View(m.Keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))

@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -18,14 +17,11 @@ import (
 
 type ImageModel struct {
 	SelectedImages mapset.Set[string]
-	Sub            chan utils.ResponseMsg
-	Text           []string
 	Viewport       viewport.Model
 	Help           help.Model
 	Keys           keyMap
 	DockerClient   docker.DockerClient
 	Message        message.Message
-	Input          textinput.Model
 	Table          table.Model
 }
 
@@ -33,14 +29,8 @@ func (m ImageModel) Init() tea.Cmd {
 	var (
 		cmds []tea.Cmd
 	)
-	cmds = append(cmds, utils.ResponseToStream(m.Sub), utils.TickCommand())
+	cmds = append(cmds, utils.TickCommand())
 	return tea.Batch(cmds...)
-}
-
-func getInput() textinput.Model {
-	ip := textinput.New()
-	ip.Placeholder = "Image Name"
-	return ip
 }
 
 func getTable(images docker.Images, selectedImages mapset.Set[string]) table.Model {
@@ -56,7 +46,6 @@ func NewModel(dockerClient docker.DockerClient) ImageModel {
 		Table:          getTable(dockerClient.Images, mapset.NewSet[string]()),
 		Help:           getHelpSection(),
 		Viewport:       getViewPort(),
-		Sub:            make(chan utils.ResponseMsg),
 		SelectedImages: mapset.NewSet[string](),
 		Keys:           keys,
 	}

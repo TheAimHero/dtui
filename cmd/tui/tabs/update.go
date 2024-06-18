@@ -81,10 +81,6 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
-	if m.ImageTab.Input.Focused() {
-		m.ImageTab, cmd = m.ImageTab.Update(msg)
-		return m, cmd
-	}
 	if m.ContainerTab.Input.Focused() {
 		m.ContainerTab, cmd = m.ContainerTab.Update(msg)
 		return m, cmd
