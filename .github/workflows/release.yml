@@ -1,0 +1,30 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        name: Check out code
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v2
+        name: Install Go
+        with:
+          go-version: 1.22
+          cache: true
+      - uses: goreleaser/goreleaser-action@v6
+        if: success() && startsWith(github.ref, 'refs/tags/')
+        with:
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
