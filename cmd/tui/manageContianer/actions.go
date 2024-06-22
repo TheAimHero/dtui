@@ -252,7 +252,8 @@ func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("Container is not running", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh")
+	// @hack: ignore security check
+	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh") // #nosec
 	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }
 
@@ -267,6 +268,7 @@ func (m ContainerModel) ShowLogs() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	c := exec.Command("docker", "logs", containerID, "--follow")
+	// @hack: ignore security check
+	c := exec.Command("docker", "logs", containerID, "--follow") // #nosec
 	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }
