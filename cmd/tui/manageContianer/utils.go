@@ -90,5 +90,3 @@ func getInput() textinput.Model {
 	ip.Prompt = "Container Filter: "
 	return ip
 }
-
-
