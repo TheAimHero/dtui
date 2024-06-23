@@ -231,6 +231,7 @@ func (m ContainerModel) SelectAllContainers() (ContainerModel, tea.Cmd) {
 }
 
 func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
+  dockerClient:= m.DockerClient.GetDockerClient()
 	row := m.Table.SelectedRow()
 	if row == nil {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
@@ -242,7 +243,7 @@ func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
 	var container types.Container
-	for _, c := range m.DockerClient.Containers {
+	for _, c := range dockerClient.Containers {
 		if c.ID == containerID {
 			container = c
 			break

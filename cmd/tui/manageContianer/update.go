@@ -44,8 +44,9 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 
 func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
+		cmd          tea.Cmd
+		cmds         []tea.Cmd
+		dockerClient = m.DockerClient.GetDockerClient()
 	)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
@@ -72,7 +73,7 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration), utils.TickCommand())
 		}
 		tableRows := getTableRows(
-			m.DockerClient.Containers,
+			dockerClient.Containers,
 			m.SelectedContainers,
 			m.InProcess,
 			m.Spinner,

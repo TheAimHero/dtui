@@ -18,7 +18,7 @@ type ContainerModel struct {
 	InProcess          mapset.Set[string]
 	Help               help.Model
 	Keys               keyMap
-	DockerClient       docker.DockerClient
+	DockerClient       docker.DockerInterface
 	Message            message.Message
 	Input              textinput.Model
 	Table              table.Model
@@ -29,7 +29,7 @@ func (m ContainerModel) Init() tea.Cmd {
 	return tea.Batch(utils.TickCommand(), m.Spinner.Tick)
 }
 
-func NewModel(dockerClient docker.DockerClient) ContainerModel {
+func NewModel(dockerClient docker.DockerInterface) ContainerModel {
 	err := dockerClient.FetchContainers()
 	spinner := getSpinner()
 	help := getHelpSection()

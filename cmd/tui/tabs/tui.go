@@ -23,10 +23,11 @@ func (m MainModel) Init() tea.Cmd {
 	return tea.Batch(m.ContainerTab.Init(), m.ImageTab.Init(), m.WipTab.Init())
 }
 
-func NewModel(dockerClient docker.DockerClient) tea.Model {
+func NewModel(dockerClient docker.DockerInterface) tea.Model {
+	dc := *dockerClient.GetDockerClient()
 	containerModel := managecontianer.NewModel(dockerClient)
-	imageModel := manageimage.NewModel(dockerClient)
-	volumeModel := managevolume.NewModel(dockerClient)
+	imageModel := manageimage.NewModel(dc)
+	volumeModel := managevolume.NewModel(dc)
 	wipModel := wip.NewModel()
 	model := MainModel{
 		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "Work In Progress"},
@@ -34,7 +35,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		ImageTab:     imageModel,
 		WipTab:       wipModel,
 		VolumeTab:    volumeModel,
-		DockerClient: dockerClient,
+		DockerClient: dc,
 		ActiveTab:    0,
 	}
 	return model
@@ -45,7 +46,7 @@ func NewTui() error {
 	if err != nil {
 		return err
 	}
-	model := NewModel(dockerClient)
+	model := NewModel(&dockerClient)
 	p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
 	// for dev purpose
 	// p := tea.NewProgram(model)

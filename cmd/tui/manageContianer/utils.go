@@ -66,9 +66,10 @@ func getTableColumns() []table.Column {
 }
 
 func (m ContainerModel) getTable() table.Model {
+  dockerClient := m.DockerClient.GetDockerClient()
 	tableColumns := getTableColumns()
 	tableRows := getTableRows(
-		m.DockerClient.Containers,
+		dockerClient.Containers,
 		m.SelectedContainers,
 		m.InProcess,
 		m.Spinner,

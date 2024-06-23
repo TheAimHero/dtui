@@ -12,10 +12,19 @@ import (
 	"github.com/docker/docker/client"
 )
 
+type DockerInterface interface {
+  // container actions
+	FetchContainers() error
+	StopContainer(containerID string) error
+	StartContainer(containerID string) error
+	DeleteContainer(containerID string) error
+
+  // get the docker client from the docker interface
+  GetDockerClient() *DockerClient
+}
+
 type Containers []types.Container
 type Images []image.Summary
-
-// type Volumes []volume.Volume
 type Volumes []*volume.Volume
 
 type DockerClient struct {
@@ -23,6 +32,10 @@ type DockerClient struct {
 	Containers Containers
 	Images     Images
 	Volumes    Volumes
+}
+
+func (d *DockerClient) GetDockerClient() *DockerClient {
+	return d
 }
 
 func NewDockerClient() (DockerClient, error) {
