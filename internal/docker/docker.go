@@ -18,7 +18,7 @@ type DockerInterface interface {
 	StopContainer(containerID string) error
 	StartContainer(containerID string) error
 	DeleteContainer(containerID string) error
-  GetContainers() Containers
+	GetContainers() Containers
 }
 
 type Containers []types.Container
