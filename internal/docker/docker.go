@@ -13,14 +13,12 @@ import (
 )
 
 type DockerInterface interface {
-  // container actions
+	// container actions
 	FetchContainers() error
 	StopContainer(containerID string) error
 	StartContainer(containerID string) error
 	DeleteContainer(containerID string) error
-
-  // get the docker client from the docker interface
-  GetDockerClient() *DockerClient
+  GetContainers() Containers
 }
 
 type Containers []types.Container
@@ -32,10 +30,6 @@ type DockerClient struct {
 	Containers Containers
 	Images     Images
 	Volumes    Volumes
-}
-
-func (d *DockerClient) GetDockerClient() *DockerClient {
-	return d
 }
 
 func NewDockerClient() (DockerClient, error) {

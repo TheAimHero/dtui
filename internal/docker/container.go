@@ -8,6 +8,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
+func (m *DockerClient) GetContainers() Containers {
+	return m.Containers
+}
+
 func (m *DockerClient) FetchContainers() error {
 	containers, err := m.client.ContainerList(context.Background(), container.ListOptions{All: true})
 	m.Containers = containers

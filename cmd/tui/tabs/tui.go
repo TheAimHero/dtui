@@ -24,7 +24,7 @@ func (m MainModel) Init() tea.Cmd {
 }
 
 func NewModel(dockerClient docker.DockerInterface) tea.Model {
-	dc := *dockerClient.GetDockerClient()
+	dc := *dockerClient.(*docker.DockerClient)
 	containerModel := managecontianer.NewModel(dockerClient)
 	imageModel := manageimage.NewModel(dc)
 	volumeModel := managevolume.NewModel(dc)

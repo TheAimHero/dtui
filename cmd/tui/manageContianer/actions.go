@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -231,7 +232,7 @@ func (m ContainerModel) SelectAllContainers() (ContainerModel, tea.Cmd) {
 }
 
 func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
-  dockerClient:= m.DockerClient.GetDockerClient()
+	dockerClient := m.DockerClient.(*docker.DockerClient)
 	row := m.Table.SelectedRow()
 	if row == nil {
 		m.Message.AddMessage("No container selected", message.InfoMessage)

@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
@@ -46,7 +47,7 @@ func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
 	var (
 		cmd          tea.Cmd
 		cmds         []tea.Cmd
-		dockerClient = m.DockerClient.GetDockerClient()
+		dockerClient = m.DockerClient.(*docker.DockerClient)
 	)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
