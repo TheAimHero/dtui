@@ -20,7 +20,6 @@ func (m ImageModel) Update(msg tea.Msg) (ImageModel, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
 		m.Table = getTable(m.DockerClient.Images, m.SelectedImages)
-		m.Viewport.Width = msg.Width - 20
 
 	case message.ClearMessage:
 		m.Message = message.Message{}
@@ -72,7 +71,6 @@ func (m ImageModel) Update(msg tea.Msg) (ImageModel, tea.Cmd) {
 	}
 	m.Table, cmd = m.Table.Update(msg)
 	cmds = append(cmds, cmd)
-	m.Viewport, cmd = m.Viewport.Update(msg)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
 }

@@ -50,23 +50,6 @@ func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 	return m, m.Message.ClearMessage(successDuration)
 }
 
-// @note: use later probably
-// func (m *ImageModel) PullImages(imageName string) (ImageModel, tea.Cmd, io.ReadCloser) {
-// 	var (
-// 		stream io.ReadCloser
-// 		err    error
-// 	)
-// 	// @fix: this causes tui to become unresponsive for a while
-// 	stream, err = m.DockerClient.PullImage(imageName)
-// 	m.Text = []string{}
-// 	if err != nil {
-// 		m.Message.AddMessage(err.Error(), message.ErrorMessage)
-// 		return *m, m.Message.ClearMessage(errorDuration), stream
-// 	}
-// 	m.Message.AddMessage("Image pulled successfully", message.SuccessMessage)
-// 	return *m, m.Message.ClearMessage(successDuration), stream
-// }
-
 func (m ImageModel) PruneImages() (ImageModel, tea.Cmd) {
 	err := m.DockerClient.PruneImage()
 	if err != nil {

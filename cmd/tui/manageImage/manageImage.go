@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
 
@@ -17,7 +16,6 @@ import (
 
 type ImageModel struct {
 	SelectedImages mapset.Set[string]
-	Viewport       viewport.Model
 	Help           help.Model
 	Keys           keyMap
 	DockerClient   docker.DockerClient
@@ -45,7 +43,6 @@ func NewModel(dockerClient docker.DockerClient) ImageModel {
 		DockerClient:   dockerClient,
 		Table:          getTable(dockerClient.Images, mapset.NewSet[string]()),
 		Help:           getHelpSection(),
-		Viewport:       getViewPort(),
 		SelectedImages: mapset.NewSet[string](),
 		Keys:           keys,
 	}
