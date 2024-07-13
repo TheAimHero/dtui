@@ -11,7 +11,7 @@ import (
 	"golang.org/x/term"
 )
 
-func (m ImageModel) Update(msg tea.Msg) (ImageModel, tea.Cmd) {
+func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd

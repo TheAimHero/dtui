@@ -3,76 +3,28 @@ package tabs
 import (
 	"os"
 
+	managecontianer "github.com/TheAimHero/dtui/cmd/tui/manageContianer"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
 )
 
 func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch m.ActiveTab {
-	case ContainerTab:
-		m.ActiveTab = ImageTab
-		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.ImageTab.Init(), cmd)
-
-	case ImageTab:
-		m.ActiveTab = VolumeTab
-		m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.VolumeTab.Init(), cmd)
-
-	case VolumeTab:
-		m.ActiveTab = WipTab
-		m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.WipTab.Init(), cmd)
-
-	default:
-		m.ActiveTab = ContainerTab
-		m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.ContainerTab.Init(), cmd)
-	}
+	m.ActiveTab = (m.ActiveTab + 1) % len(m.Tabs)
+	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+	return m, tea.Sequence(m.Tabs[m.ActiveTab%len(m.Tabs)].Init(), cmd)
 }
 
 func (m MainModel) getPrevTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch m.ActiveTab {
-	case ContainerTab:
-		m.ActiveTab = WipTab
-		m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.WipTab.Init(), cmd)
-
-	case ImageTab:
-		m.ActiveTab = ContainerTab
-		m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.ContainerTab.Init(), cmd)
-
-	case VolumeTab:
-		m.ActiveTab = ImageTab
-		m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.ImageTab.Init(), cmd)
-
-	default:
-		m.ActiveTab = VolumeTab
-		m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-		return m, tea.Sequence(m.VolumeTab.Init(), cmd)
-
-	}
+	m.ActiveTab = (m.ActiveTab - 1 + len(m.Tabs)) % len(m.Tabs)
+	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+	return m, tea.Sequence(m.Tabs[m.ActiveTab%len(m.Tabs)].Init(), cmd)
 }
 
 func (m MainModel) updateCurrentTab(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch m.ActiveTab {
-	case ContainerTab:
-		m.ContainerTab, cmd = m.ContainerTab.Update(msg)
-
-	case ImageTab:
-		m.ImageTab, cmd = m.ImageTab.Update(msg)
-
-	case VolumeTab:
-		m.VolumeTab, cmd = m.VolumeTab.Update(msg)
-
-	default:
-		m.WipTab, cmd = m.WipTab.Update(msg)
-	}
+	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(msg)
 	return m, cmd
 }
 
@@ -81,42 +33,18 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
-	if m.ContainerTab.Input.Focused() {
-		m.ContainerTab, cmd = m.ContainerTab.Update(msg)
+	if s, ok := m.Tabs[m.ActiveTab].(managecontianer.ContainerModel); ok && s.Input.Focused() {
+		m.Tabs[m.ActiveTab], cmd = s.Update(msg)
 		return m, cmd
 	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "1":
+		case "1", "2", "3", "4":
 			m.ActiveTab = ContainerTab
-			m.ContainerTab, cmd = m.ContainerTab.Update(msg)
+			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(msg)
 			cmds = append(cmds, cmd)
-			m.ContainerTab, cmd = m.ContainerTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-			cmds = append(cmds, cmd)
-			return m, tea.Batch(cmds...)
-
-		case "2":
-			m.ActiveTab = ImageTab
-			m.ImageTab, cmd = m.ImageTab.Update(msg)
-			cmds = append(cmds, cmd)
-			m.ImageTab, cmd = m.ImageTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-			cmds = append(cmds, cmd)
-			return m, tea.Batch(cmds...)
-
-		case "3":
-			m.ActiveTab = VolumeTab
-			m.VolumeTab, cmd = m.VolumeTab.Update(msg)
-			cmds = append(cmds, cmd)
-			m.VolumeTab, cmd = m.VolumeTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-			cmds = append(cmds, cmd)
-			return m, tea.Batch(cmds...)
-
-		case "4":
-			m.ActiveTab = WipTab
-			m.WipTab, cmd = m.WipTab.Update(msg)
-			cmds = append(cmds, cmd)
-			m.WipTab, cmd = m.WipTab.Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
 			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
 

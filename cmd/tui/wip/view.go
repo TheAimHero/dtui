@@ -33,7 +33,7 @@ func (m WipModel) View() string {
 	return doc.String()
 }
 
-func (m WipModel) Update(msg tea.Msg) (WipModel, tea.Cmd) {
+func (m WipModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))

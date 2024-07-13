@@ -11,7 +11,7 @@ import (
 	"golang.org/x/term"
 )
 
-func (m VolumeModel) Update(msg tea.Msg) (VolumeModel, tea.Cmd) {
+func (m VolumeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd

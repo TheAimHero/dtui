@@ -13,14 +13,19 @@ type MainModel struct {
 	WipTab       wip.WipModel
 	DockerClient docker.DockerClient
 	TabsTitle    []string
-	ContainerTab managecontianer.ContainerModel
-	VolumeTab    managevolume.VolumeModel
-	ImageTab     manageimage.ImageModel
+	Tabs         []tea.Model
 	ActiveTab    int
+	// ContainerTab managecontianer.ContainerModel
+	// VolumeTab    managevolume.VolumeModel
+	// ImageTab     manageimage.ImageModel
 }
 
 func (m MainModel) Init() tea.Cmd {
-	return tea.Batch(m.ContainerTab.Init(), m.ImageTab.Init(), m.WipTab.Init())
+	cmds := []tea.Cmd{}
+	for _, m := range m.Tabs {
+		cmds = append(cmds, m.Init())
+	}
+	return tea.Batch(cmds...)
 }
 
 func NewModel(dockerClient docker.DockerClient) tea.Model {
@@ -30,10 +35,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 	wipModel := wip.NewModel()
 	model := MainModel{
 		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "Work In Progress"},
-		ContainerTab: containerModel,
-		ImageTab:     imageModel,
-		WipTab:       wipModel,
-		VolumeTab:    volumeModel,
+		Tabs:         []tea.Model{&containerModel, &imageModel, &volumeModel, &wipModel},
 		DockerClient: dockerClient,
 		ActiveTab:    0,
 	}

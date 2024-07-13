@@ -46,18 +46,7 @@ var (
 )
 
 func TabView(m MainModel) string {
-	switch m.ActiveTab {
-	case ContainerTab:
-		return m.ContainerTab.View()
-	case ImageTab:
-		return m.ImageTab.View()
-	case VolumeTab:
-		return m.VolumeTab.View()
-	case WipTab:
-		return m.WipTab.View()
-	default:
-		return ""
-	}
+	return m.Tabs[m.ActiveTab].View()
 }
 
 func (m MainModel) View() string {

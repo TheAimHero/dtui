@@ -42,7 +42,7 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 	}
 }
 
-func (m ContainerModel) Update(msg tea.Msg) (ContainerModel, tea.Cmd) {
+func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
 		cmd  tea.Cmd
 		cmds []tea.Cmd
