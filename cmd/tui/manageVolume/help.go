@@ -13,13 +13,14 @@ var (
 )
 
 type keyMap struct {
-	Up          key.Binding
-	Down        key.Binding
-	Left        key.Binding
-	Right       key.Binding
-	Help        key.Binding
-	Quit        key.Binding
-	PruneVolume key.Binding
+	Up           key.Binding
+	Down         key.Binding
+	Left         key.Binding
+	Right        key.Binding
+	Help         key.Binding
+	Quit         key.Binding
+	PruneVolume  key.Binding
+	DeleteVolume key.Binding
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -31,7 +32,7 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Help, k.Quit},
 		{k.Up, k.Down},
 		{k.Left, k.Right},
-		{k.PruneVolume},
+		{k.PruneVolume, k.DeleteVolume},
 	}
 }
 
@@ -63,6 +64,10 @@ var keys = keyMap{
 	PruneVolume: key.NewBinding(
 		key.WithKeys("p"),
 		key.WithHelp("p", "prune volume"),
+	),
+	DeleteVolume: key.NewBinding(
+		key.WithKeys("d"),
+		key.WithHelp("d", "delete volume"),
 	),
 }
 

@@ -17,3 +17,8 @@ func (m *DockerClient) PruneVolume() error {
 	_, err := m.client.VolumesPrune(context.Background(), filters.NewArgs())
 	return err
 }
+
+func (m *DockerClient) DeleteVolume(volumeID string,force bool) error {
+	err := m.client.VolumeRemove(context.Background(), volumeID, force)
+	return err
+}

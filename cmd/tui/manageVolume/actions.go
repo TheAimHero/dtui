@@ -31,3 +31,22 @@ func (m VolumeModel) PruneVolume() (VolumeModel, tea.Cmd) {
 		return deleteMsg
 	}
 }
+
+func (m VolumeModel) DeleteVolume() (VolumeModel, tea.Cmd) {
+	deleteMsg := message.Message{}
+	row := m.Table.SelectedRow()
+	if row == nil {
+		m.Message.AddMessage("No volume selected", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	return m, func() tea.Msg {
+		err := m.DockerClient.DeleteVolume(row[VolumeName], false)
+		if err != nil {
+			deleteMsg.AddMessage("Error while deleting volume", message.ErrorMessage)
+			return deleteMsg
+		}
+		deleteMsg.AddMessage("Volume deleted", message.SuccessMessage)
+		m.Table.SetCursor(0)
+		return deleteMsg
+	}
+}

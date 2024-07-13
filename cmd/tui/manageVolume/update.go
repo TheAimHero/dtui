@@ -52,6 +52,10 @@ func (m VolumeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.Keys.Quit):
 			return m, tea.Quit
 
+		case key.Matches(msg, m.Keys.DeleteVolume):
+			m, cmd = m.DeleteVolume()
+			cmds = append(cmds, cmd)
+
 		case key.Matches(msg, m.Keys.Help):
 			m.Help.ShowAll = !m.Help.ShowAll
 
