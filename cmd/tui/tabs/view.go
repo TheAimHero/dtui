@@ -37,11 +37,16 @@ var (
 		BottomLeft:  "┴",
 		BottomRight: "┴",
 	}
-	docStyle                         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
-	inactiveTabStyle                 = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui_table.HighlightColor)
-	padTabStyle                      = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
-	activeTabStyle                   = inactiveTabStyle.Copy().Border(activeTabBorder, true)
-	windowStyle                      = lipgloss.NewStyle().BorderForeground(ui_table.HighlightColor).Align(lipgloss.Center).Border(lipgloss.NormalBorder()).UnsetBorderTop().Padding(2, 0)
+	docStyle         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
+	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui_table.HighlightColor)
+	padTabStyle      = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
+	activeTabStyle   = inactiveTabStyle.Copy().Border(activeTabBorder, true)
+	windowStyle      = lipgloss.NewStyle().
+				BorderForeground(ui_table.HighlightColor).
+				Align(lipgloss.Center).
+				Border(lipgloss.NormalBorder()).
+				UnsetBorderTop().
+				Padding(2, 0)
 	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
 )
 

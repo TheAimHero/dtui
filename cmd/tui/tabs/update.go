@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	managecontianer "github.com/TheAimHero/dtui/cmd/tui/manageContianer"
+	manageimage "github.com/TheAimHero/dtui/cmd/tui/manageImage"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
 )
@@ -35,6 +36,10 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds []tea.Cmd
 	)
 	if s, ok := m.Tabs[m.ActiveTab].(managecontianer.ContainerModel); ok && s.Input.Focused() {
+		m.Tabs[m.ActiveTab], cmd = s.Update(msg)
+		return m, cmd
+	}
+	if s, ok := m.Tabs[m.ActiveTab].(manageimage.ImageModel); ok && s.Input.Focused() {
 		m.Tabs[m.ActiveTab], cmd = s.Update(msg)
 		return m, cmd
 	}

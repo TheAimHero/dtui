@@ -2,7 +2,9 @@ package docker
 
 import (
 	"context"
+	"errors"
 	"io"
+	"sync"
 	"time"
 
 	"github.com/docker/docker/api/types/filters"
@@ -28,6 +30,21 @@ func (m *DockerClient) PruneImage() error {
 }
 
 func (m *DockerClient) PullImage(imageName string) (io.ReadCloser, error) {
-	stream, err := m.client.ImagePull(context.Background(), imageName, image.PullOptions{})
-	return stream, err
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	errChan := make(chan error)
+	go func() {
+		stream, err := m.client.ImagePull(context.Background(), imageName, image.PullOptions{})
+		if err != nil {
+			wg.Done()
+			errChan <- errors.New("Error while pulling image: " + imageName)
+			return
+		}
+		defer stream.Close()
+		_, _ = io.Copy(io.Discard, stream)
+		wg.Done()
+		errChan <- nil
+	}()
+	wg.Wait()
+	return nil, <-errChan
 }

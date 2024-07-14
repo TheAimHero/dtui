@@ -1,12 +1,16 @@
 package manageimage
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
 	ImageStatus = iota
+	ImageLoading
 	ImageID
 	ImageTag
 	ImageCreated
@@ -60,6 +64,28 @@ func (m ImageModel) PruneImages() (ImageModel, tea.Cmd) {
 	m.Message.AddMessage("Images pruned", message.SuccessMessage)
 	m.Table.SetCursor(0)
 	return m, m.Message.ClearMessage(successDuration)
+}
+
+func (m ImageModel) PullImage() (ImageModel, tea.Cmd) {
+	imageName := m.Input.Value()
+	if imageName == "" {
+		m.Message.AddMessage("Image name cannot be empty", message.InfoMessage)
+		return m, m.Message.ClearMessage(message.InfoDuration)
+	}
+	pullMsg := message.Message{}
+	return m, func() tea.Msg {
+		m.PullProgress.Add(imageName)
+		curTime := time.Now()
+		_, err := m.DockerClient.PullImage(imageName)
+		if err != nil {
+			pullMsg.AddMessage("Error while pulling image: "+imageName, message.ErrorMessage)
+			m.PullProgress.Remove(imageName)
+			return pullMsg
+		}
+		m.PullProgress.Remove(imageName)
+		pullMsg.AddMessage(fmt.Sprintf("Image %s pulled in %s", imageName, time.Since(curTime)), message.SuccessMessage)
+		return pullMsg
+	}
 }
 
 func (m ImageModel) SelectImage() (ImageModel, tea.Cmd) {

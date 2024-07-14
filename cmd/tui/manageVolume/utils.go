@@ -44,13 +44,12 @@ func getTableRows(volumes docker.Volumes, selectedVolumes mapset.Set[string]) []
 }
 
 func getTableColumns() []table.Column {
-	// width := ((physicalWidth) / 1)
 	return []table.Column{
 		{Title: "Select", Width: 8},
 		{Title: "Name", Width: 20},
 		{Title: "Created At", Width: 30},
-		{Title: "Mountpoint", Width: physicalWidth - 100},
-		{Title: "Size", Width: 13},
+		{Title: "Mountpoint", Width: physicalWidth - 88},
+		{Title: "Size", Width: 14},
 	}
 }
 

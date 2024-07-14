@@ -34,7 +34,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "Work In Progress"},
 		Tabs:         []tea.Model{&containerModel, &imageModel, &volumeModel, &wipModel},
 		DockerClient: dockerClient,
-		ActiveTab:    0,
+		ActiveTab:    2,
 	}
 	return model
 }
