@@ -15,9 +15,6 @@ type MainModel struct {
 	TabsTitle    []string
 	Tabs         []tea.Model
 	ActiveTab    int
-	// ContainerTab managecontianer.ContainerModel
-	// VolumeTab    managevolume.VolumeModel
-	// ImageTab     manageimage.ImageModel
 }
 
 func (m MainModel) Init() tea.Cmd {

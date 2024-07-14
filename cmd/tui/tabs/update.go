@@ -2,6 +2,7 @@ package tabs
 
 import (
 	"os"
+	"strconv"
 
 	managecontianer "github.com/TheAimHero/dtui/cmd/tui/manageContianer"
 	tea "github.com/charmbracelet/bubbletea"
@@ -41,11 +42,12 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "1", "2", "3", "4":
-			m.ActiveTab = ContainerTab
+      tabNo, _ := strconv.Atoi(msg.String())
+      m.ActiveTab = tabNo - 1
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(msg)
 			cmds = append(cmds, cmd)
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-			cmds = append(cmds, cmd)
+			cmds = append(cmds, cmd, tea.Println(msg.String()))
 			return m, tea.Batch(cmds...)
 
 		case "right", "l":
