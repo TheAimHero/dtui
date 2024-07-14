@@ -1,0 +1,27 @@
+version: "3"
+
+tasks:
+  build:
+    cmds:
+      - go build -o bin/dtui_$(go env GOOS)_$(go env GOARCH) -ldflags "-s -w" .
+
+  run:
+    cmds:
+      - go run .
+
+  clean:
+    cmds:
+      - rm -rf build
+
+  test:
+    cmds:
+      - go test ./...
+
+  lint:
+    cmds:
+      - go vet ./... 
+      - golangci-lint run -v
+
+  format: 
+    cmds:
+      - gofmt -l -w .

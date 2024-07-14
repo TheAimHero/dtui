@@ -18,7 +18,7 @@ func (m *DockerClient) PruneVolume() error {
 	return err
 }
 
-func (m *DockerClient) DeleteVolume(volumeID string,force bool) error {
+func (m *DockerClient) DeleteVolume(volumeID string, force bool) error {
 	err := m.client.VolumeRemove(context.Background(), volumeID, force)
 	return err
 }

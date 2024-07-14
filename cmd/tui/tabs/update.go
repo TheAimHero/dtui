@@ -42,8 +42,8 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "1", "2", "3", "4":
-      tabNo, _ := strconv.Atoi(msg.String())
-      m.ActiveTab = tabNo - 1
+			tabNo, _ := strconv.Atoi(msg.String())
+			m.ActiveTab = tabNo - 1
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(msg)
 			cmds = append(cmds, cmd)
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
