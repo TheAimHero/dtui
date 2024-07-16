@@ -112,8 +112,8 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.Input.Focused() {
 			return m.updateInput(msg)
 		}
-		if m.Conformation.Active {
-			m.Conformation, cmd = m.Conformation.Update(msg)
+		if m.Confirmation.Active {
+			m.Confirmation, cmd = m.Confirmation.Update(msg)
 			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
 		}
@@ -125,10 +125,10 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Help.ShowAll = !m.Help.ShowAll
 
 		case key.Matches(msg, m.Keys.StartContainers):
-			m.Conformation = prompt.NewModel("Are you sure you want to start selected containers?", func() tea.Msg { return ActionStartContainer })
+			m.Confirmation = prompt.NewModel("Are you sure you want to start selected containers?", func() tea.Msg { return ActionStartContainer })
 
 		case key.Matches(msg, m.Keys.StopContainers):
-			m.Conformation = prompt.NewModel("Are you sure you want to stop selected containers?", func() tea.Msg { return ActionStopContainer })
+			m.Confirmation = prompt.NewModel("Are you sure you want to stop selected containers?", func() tea.Msg { return ActionStopContainer })
 
 		case key.Matches(msg, m.Keys.ToggleSelected):
 			m, cmd = m.SelectContainers()
@@ -139,7 +139,7 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 
 		case key.Matches(msg, m.Keys.DeleteContainers):
-			m.Conformation = prompt.NewModel("Are you sure you want to delete selected containers?", func() tea.Msg { return ActionDeleteContainer })
+			m.Confirmation = prompt.NewModel("Are you sure you want to delete selected containers?", func() tea.Msg { return ActionDeleteContainer })
 
 		case key.Matches(msg, m.Keys.ShowLogs):
 			m, cmd = m.ShowLogs()

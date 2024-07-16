@@ -20,7 +20,7 @@ type ContainerModel struct {
 	InProcess          mapset.Set[string]
 	Keys               keyMap
 	DockerClient       docker.DockerClient
-	Conformation       prompt.Model
+	Confirmation       prompt.Model
 	Message            message.Message
 	Input              textinput.Model
 	Spinner            spinner.Model
