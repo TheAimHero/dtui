@@ -16,6 +16,7 @@ var (
 func (m VolumeModel) View() string {
 	doc := strings.Builder{}
 	doc.WriteString(ui_table.BaseTableStyle.Render(m.Table.View()))
+	doc.WriteString("\n" + m.Confirmation.View())
 	doc.WriteString("\n" + m.Message.ShowMessage())
 	doc.WriteString("\n" + m.Help.View(m.Keys))
 	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))

@@ -3,6 +3,7 @@ package managevolume
 import (
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
@@ -13,6 +14,7 @@ type VolumeModel struct {
 	Help         help.Model
 	Keys         keyMap
 	DockerClient docker.DockerClient
+	Confirmation prompt.Model
 	Message      message.Message
 	Table        table.Model
 }

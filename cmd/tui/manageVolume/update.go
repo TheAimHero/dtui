@@ -5,11 +5,31 @@ import (
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
 )
+
+type ActionType int
+
+const (
+	ActionNoOp ActionType = iota
+	ActionDeleteVolume
+	ActionPruneVolume
+)
+
+func (m VolumeModel) handleAction(action ActionType) (tea.Model, tea.Cmd) {
+	switch action {
+	case ActionDeleteVolume:
+		return m.DeleteVolume()
+
+	case ActionPruneVolume:
+		return m.PruneVolume()
+	}
+	return m, nil
+}
 
 func (m VolumeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var (
@@ -44,25 +64,30 @@ func (m VolumeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Table.SetRows(tableRows)
 		cmds = append(cmds, utils.TickCommand(), cmd)
 
+	case ActionType:
+		return m.handleAction(msg)
+
 	case tea.KeyMsg:
+		if m.Confirmation.Active {
+			m.Confirmation, cmd = m.Confirmation.Update(msg)
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
+		}
 		switch {
 		case key.Matches(msg, m.Keys.Quit):
 			return m, tea.Quit
 
 		case key.Matches(msg, m.Keys.DeleteVolume):
-			m, cmd = m.DeleteVolume()
-			cmds = append(cmds, cmd)
+			m.Confirmation = prompt.NewModel("Are you sure you want to delete volume?", func() tea.Msg { return ActionDeleteVolume })
 
 		case key.Matches(msg, m.Keys.Help):
 			m.Help.ShowAll = !m.Help.ShowAll
 
 		case key.Matches(msg, m.Keys.PruneVolume):
-			m, cmd = m.PruneVolume()
-			cmds = append(cmds, cmd)
+			m.Confirmation = prompt.NewModel("Are you sure you want to prune volumes?", func() tea.Msg { return ActionPruneVolume })
 		}
 	}
 	m.Table, cmd = m.Table.Update(msg)
-	cmds = append(cmds, cmd)
 	cmds = append(cmds, cmd)
 	return m, tea.Batch(cmds...)
 }
