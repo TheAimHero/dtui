@@ -5,11 +5,21 @@ import (
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
+)
+
+type ActionType int
+
+const (
+	ActionNoOp ActionType = iota
+	ActionDeleteImage
+	ActionPruneImage
+	ActionPullImage
 )
 
 func (m ImageModel) updateInput(msg tea.KeyMsg) (ImageModel, tea.Cmd) {
@@ -30,14 +40,27 @@ func (m ImageModel) updateInput(msg tea.KeyMsg) (ImageModel, tea.Cmd) {
 		m.Keys.ShowInput.SetEnabled(true)
 		m.Keys.EscapeInput.SetEnabled(false)
 		m.Keys.Submit.SetEnabled(false)
-		m, cmd = m.PullImage()
-		m.Input.SetValue("")
+		m.Conformation = prompt.NewModel("Are you sure you want to pull image", func() tea.Msg { return ActionPullImage })
 		return m, tea.Batch(cmd)
 
 	default:
 		m.Input, cmd = m.Input.Update(msg)
 		return m, cmd
 	}
+}
+
+func (m ImageModel) handleAction(action ActionType) (tea.Model, tea.Cmd) {
+	switch action {
+	case ActionDeleteImage:
+		return m.DeleteImages()
+
+	case ActionPullImage:
+		return m.PullImage()
+
+	case ActionPruneImage:
+		return m.PruneImages()
+	}
+	return m, nil
 }
 
 func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -73,9 +96,17 @@ func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		cmds = append(cmds, m.Message.ClearMessage(duration))
 
+	case ActionType:
+		return m.handleAction(msg)
+
 	case tea.KeyMsg:
 		if m.Input.Focused() {
 			return m.updateInput(msg)
+		}
+		if m.Conformation.Active {
+			m.Conformation, cmd = m.Conformation.Update(msg)
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 		}
 		switch {
 		case key.Matches(msg, m.Keys.Quit):
@@ -93,12 +124,10 @@ func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 
 		case key.Matches(msg, m.Keys.DeleteImages):
-			m, cmd = m.DeleteImages()
-			cmds = append(cmds, cmd)
+			m.Conformation = prompt.NewModel("Are you sure you want to delete these images?", func() tea.Msg { return ActionDeleteImage })
 
 		case key.Matches(msg, m.Keys.PruneImages):
-			m, cmd = m.PruneImages()
-			cmds = append(cmds, cmd)
+			m.Conformation = prompt.NewModel("Are you sure you want to prune these images?", func() tea.Msg { return ActionPruneImage })
 
 		case key.Matches(msg, m.Keys.ShowInput):
 			m.Input = getInput()

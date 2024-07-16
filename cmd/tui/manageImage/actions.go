@@ -68,6 +68,7 @@ func (m ImageModel) PruneImages() (ImageModel, tea.Cmd) {
 
 func (m ImageModel) PullImage() (ImageModel, tea.Cmd) {
 	imageName := m.Input.Value()
+	m.Input.SetValue("")
 	if imageName == "" {
 		m.Message.AddMessage("Image name cannot be empty", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)

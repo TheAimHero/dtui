@@ -36,6 +36,7 @@ func (m ImageModel) View() string {
 	} else {
 		doc.WriteString(strings.Repeat("\n", 2))
 	}
+	doc.WriteString("\n" + m.Conformation.View())
 	doc.WriteString("\n" + m.Message.ShowMessage())
 	doc.WriteString("\n" + m.Help.View(m.Keys))
 	if m.PullProgress.Cardinality() > 0 {

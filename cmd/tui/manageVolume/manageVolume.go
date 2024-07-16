@@ -10,11 +10,11 @@ import (
 )
 
 type VolumeModel struct {
-	Help            help.Model
-	Keys            keyMap
-	DockerClient    docker.DockerClient
-	Message         message.Message
-	Table           table.Model
+	Help         help.Model
+	Keys         keyMap
+	DockerClient docker.DockerClient
+	Message      message.Message
+	Table        table.Model
 }
 
 func (m VolumeModel) Init() tea.Cmd {
@@ -25,10 +25,10 @@ func NewModel(dockerClient docker.DockerClient) VolumeModel {
 	err := dockerClient.FetchVolumes()
 	help := getHelpSection()
 	m := VolumeModel{
-		DockerClient:    dockerClient,
-		Help:            help,
-		Message:         message.Message{},
-		Keys:            keys,
+		DockerClient: dockerClient,
+		Help:         help,
+		Message:      message.Message{},
+		Keys:         keys,
 	}
 	m.Table = m.getTable()
 	if err != nil {

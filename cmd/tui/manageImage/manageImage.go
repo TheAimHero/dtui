@@ -12,6 +12,7 @@ import (
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
@@ -27,6 +28,7 @@ type ImageModel struct {
 	DockerClient   docker.DockerClient
 	Message        message.Message
 	Input          textinput.Model
+	Conformation   prompt.Model
 	Table          table.Model
 }
 
