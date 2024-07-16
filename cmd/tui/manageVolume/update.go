@@ -40,10 +40,7 @@ func (m VolumeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Message.AddMessage("Error while fetching volumes", message.ErrorMessage)
 			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration), utils.TickCommand())
 		}
-		tableRows := getTableRows(
-			m.DockerClient.Volumes,
-			m.SelectedVolumes,
-		)
+		tableRows := getTableRows(m.DockerClient.Volumes)
 		m.Table.SetRows(tableRows)
 		cmds = append(cmds, utils.TickCommand(), cmd)
 

@@ -7,11 +7,9 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
-	mapset "github.com/deckarep/golang-set/v2"
 )
 
 type VolumeModel struct {
-	SelectedVolumes mapset.Set[string]
 	Help            help.Model
 	Keys            keyMap
 	DockerClient    docker.DockerClient
@@ -31,7 +29,6 @@ func NewModel(dockerClient docker.DockerClient) VolumeModel {
 		Help:            help,
 		Message:         message.Message{},
 		Keys:            keys,
-		SelectedVolumes: mapset.NewSet[string](),
 	}
 	m.Table = m.getTable()
 	if err != nil {

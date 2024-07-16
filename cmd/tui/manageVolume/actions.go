@@ -6,8 +6,7 @@ import (
 )
 
 const (
-	VolumeSelected = iota
-	VolumeName
+	VolumeName = iota
 	VolumeCreated
 	VolumeMountpoint
 	VolumeSize
