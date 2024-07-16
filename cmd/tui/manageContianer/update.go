@@ -5,11 +5,21 @@ import (
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"golang.org/x/term"
+)
+
+type ActionType int
+
+const (
+	ActionNoOp ActionType = iota
+	ActionStartContainer
+	ActionStopContainer
+	ActionDeleteContainer
 )
 
 func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
@@ -40,6 +50,20 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 		m.Table.SetCursor(0)
 		return m, cmd
 	}
+}
+
+func (m ContainerModel) handleAction(action ActionType) (tea.Model, tea.Cmd) {
+	switch action {
+	case ActionStartContainer:
+		return m.StartContainers()
+
+	case ActionStopContainer:
+		return m.StopContainers()
+
+	case ActionDeleteContainer:
+		return m.DeleteContainers()
+	}
+	return m, nil
 }
 
 func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -81,9 +105,17 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Input, cmd = m.Input.Update(msg)
 		cmds = append(cmds, utils.TickCommand(), tea.Println(m.Input.Value()), cmd)
 
+	case ActionType:
+		return m.handleAction(msg)
+
 	case tea.KeyMsg:
 		if m.Input.Focused() {
 			return m.updateInput(msg)
+		}
+		if m.Conformation.Active {
+			m.Conformation, cmd = m.Conformation.Update(msg)
+			cmds = append(cmds, cmd)
+			return m, tea.Batch(cmds...)
 		}
 		switch {
 		case key.Matches(msg, m.Keys.Quit):
@@ -93,12 +125,10 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Help.ShowAll = !m.Help.ShowAll
 
 		case key.Matches(msg, m.Keys.StartContainers):
-			m, cmd = m.StartContainers()
-			cmds = append(cmds, cmd)
+			m.Conformation = prompt.NewModel("Are you sure you want to start selected containers?", func() tea.Msg { return ActionStartContainer })
 
 		case key.Matches(msg, m.Keys.StopContainers):
-			m, cmd = m.StopContainers()
-			cmds = append(cmds, cmd)
+			m.Conformation = prompt.NewModel("Are you sure you want to stop selected containers?", func() tea.Msg { return ActionStopContainer })
 
 		case key.Matches(msg, m.Keys.ToggleSelected):
 			m, cmd = m.SelectContainers()
@@ -109,8 +139,7 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 
 		case key.Matches(msg, m.Keys.DeleteContainers):
-			m, cmd = m.DeleteContainers()
-			cmds = append(cmds, cmd)
+			m.Conformation = prompt.NewModel("Are you sure you want to delete selected containers?", func() tea.Msg { return ActionDeleteContainer })
 
 		case key.Matches(msg, m.Keys.ShowLogs):
 			m, cmd = m.ShowLogs()

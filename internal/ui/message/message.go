@@ -28,9 +28,9 @@ type ClearMessage struct{}
 
 var (
 	msgStyle     = lipgloss.NewStyle().Padding(1, 0)
-	errStyle     = msgStyle.Copy().Foreground(lipgloss.Color("#cb4154"))
-	successStyle = msgStyle.Copy().Foreground(lipgloss.Color("#AADB1E"))
-	infoStyle    = msgStyle.Copy().Foreground(lipgloss.Color("#A4DBE8"))
+	errStyle     = msgStyle.Foreground(lipgloss.Color("#cb4154"))
+	successStyle = msgStyle.Foreground(lipgloss.Color("#AADB1E"))
+	infoStyle    = msgStyle.Foreground(lipgloss.Color("#A4DBE8"))
 )
 
 func (msg *Message) AddMessage(value string, messageType int) {

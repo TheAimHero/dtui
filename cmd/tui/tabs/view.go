@@ -40,7 +40,7 @@ var (
 	docStyle         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
 	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui_table.HighlightColor)
 	padTabStyle      = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
-	activeTabStyle   = inactiveTabStyle.Copy().Border(activeTabBorder, true)
+	activeTabStyle   = inactiveTabStyle.Border(activeTabBorder, true)
 	windowStyle      = lipgloss.NewStyle().
 				BorderForeground(ui_table.HighlightColor).
 				Align(lipgloss.Center).
@@ -62,9 +62,9 @@ func (m MainModel) View() string {
 		var style lipgloss.Style
 		isFirst, isLast, isActive := i == 0, i == len(m.TabsTitle)-1, i == m.ActiveTab
 		if isActive {
-			style = activeTabStyle.Copy()
+			style = activeTabStyle
 		} else {
-			style = inactiveTabStyle.Copy()
+			style = inactiveTabStyle
 		}
 		border, _, _, _, _ := style.GetBorder()
 		if isFirst && isActive {

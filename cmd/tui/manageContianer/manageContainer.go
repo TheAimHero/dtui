@@ -10,19 +10,21 @@ import (
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
+	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 type ContainerModel struct {
+	Help               help.Model
 	SelectedContainers mapset.Set[string]
 	InProcess          mapset.Set[string]
-	Help               help.Model
 	Keys               keyMap
 	DockerClient       docker.DockerClient
+	Conformation       prompt.Model
 	Message            message.Message
 	Input              textinput.Model
-	Table              table.Model
 	Spinner            spinner.Model
+	Table              table.Model
 }
 
 func (m ContainerModel) Init() tea.Cmd {

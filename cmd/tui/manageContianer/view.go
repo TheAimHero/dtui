@@ -17,6 +17,7 @@ var (
 func (m ContainerModel) View() string {
 	doc := strings.Builder{}
 	doc.WriteString(ui_table.BaseTableStyle.Render(m.Table.View()))
+	doc.WriteString("\n" + m.Conformation.View())
 	if m.Input.Focused() || m.Input.Value() != "" {
 		doc.WriteString("\n" + lipgloss.NewStyle().Padding(1, 0, 0, 0).Render(m.Input.View()))
 	} else {

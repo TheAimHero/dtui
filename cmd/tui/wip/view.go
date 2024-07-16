@@ -19,8 +19,8 @@ var (
 func (m WipModel) View() string {
 	doc := strings.Builder{}
 	baseStyle := lipgloss.NewStyle().Padding(1, 2)
-	emphasisStyle := baseStyle.Copy().Bold(true).Foreground(lipgloss.Color("#F1FA8C"))
-	titleStyle := baseStyle.Copy().Bold(true).Italic(true).Foreground(lipgloss.Color("#05C3DD"))
+	emphasisStyle := baseStyle.Bold(true).Foreground(lipgloss.Color("#F1FA8C"))
+	titleStyle := baseStyle.Bold(true).Italic(true).Foreground(lipgloss.Color("#05C3DD"))
 
 	doc.WriteString(titleStyle.Render("Work in progress... and Coming Soon..."))
 	doc.WriteString("\n" + "What's next?\n")
