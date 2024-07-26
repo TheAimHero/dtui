@@ -103,7 +103,7 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		)
 		m.Table.SetRows(filterRows(tableRows, m.Input.Value()))
 		m.Input, cmd = m.Input.Update(msg)
-		cmds = append(cmds, utils.TickCommand(), tea.Println(m.Input.Value()), cmd)
+		cmds = append(cmds, utils.TickCommand(), cmd)
 
 	case ActionType:
 		return m.handleAction(msg)

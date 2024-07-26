@@ -52,7 +52,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(msg)
 			cmds = append(cmds, cmd)
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
-			cmds = append(cmds, cmd, tea.Println(msg.String()))
+			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
 
 		case "right", "l":

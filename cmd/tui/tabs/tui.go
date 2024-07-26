@@ -58,9 +58,9 @@ func NewTui() error {
 	if err != nil {
 		return err
 	}
-	// _, err = tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
+	_, err = tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
 	// for dev purpose
-	_, err = tea.NewProgram(model).Run()
+	// _, err = tea.NewProgram(model).Run()
 	if err != nil {
 		return err
 	}
