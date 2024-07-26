@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"math"
 	"time"
 
 	"github.com/araddon/dateparse"
@@ -83,4 +84,8 @@ func GetSize(bytes int64) string {
 func GetDate(dateStr string) string {
 	date, _ := dateparse.ParseAny(dateStr)
 	return date.Format("02/01/2006 15:04 MST")
+}
+
+func FloorMul(n int, m float64) int {
+	return int(math.Floor(float64(n) * m))
 }

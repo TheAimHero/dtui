@@ -11,6 +11,7 @@ import (
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 func filterRows(rows []table.Row, filter string) []table.Row {
@@ -54,14 +55,13 @@ func getTableRows(containers docker.Containers, selectedContainers mapset.Set[st
 }
 
 func getTableColumns() []table.Column {
-	width := ((physicalWidth) / 4)
 	return []table.Column{
-		{Title: "Select", Width: 8},
-		{Title: "Loading", Width: 9},
-		{Title: "ID", Width: width},
-		{Title: "Name", Width: 15},
-		{Title: "Image", Width: width},
-		{Title: "Status", Width: width},
+		{Title: "Select", Width: utils.FloorMul(physicalWidth, 0.05)},
+		{Title: "Loading", Width: utils.FloorMul(physicalWidth, 0.05)},
+		{Title: "ID", Width: utils.FloorMul(physicalWidth, 0.1)},
+		{Title: "Name", Width: utils.FloorMul(physicalWidth, 0.3)},
+		{Title: "Image", Width: utils.FloorMul(physicalWidth, 0.2)},
+		{Title: "Status", Width: utils.FloorMul(physicalWidth, 0.2)},
 	}
 }
 

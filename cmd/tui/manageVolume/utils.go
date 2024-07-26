@@ -37,10 +37,10 @@ func getTableRows(volumes docker.Volumes) []table.Row {
 
 func getTableColumns() []table.Column {
 	return []table.Column{
-		{Title: "Name", Width: 20},
-		{Title: "Created At", Width: 30},
-		{Title: "Mountpoint", Width: physicalWidth - 78},
-		{Title: "Size", Width: 14},
+		{Title: "Name", Width: utils.FloorMul(physicalWidth, 0.2)},
+		{Title: "Created At", Width: utils.FloorMul(physicalWidth, 0.15)},
+		{Title: "Mountpoint", Width: utils.FloorMul(physicalWidth, 0.45)},
+		{Title: "Size", Width: utils.FloorMul(physicalWidth, 0.1)},
 	}
 }
 
