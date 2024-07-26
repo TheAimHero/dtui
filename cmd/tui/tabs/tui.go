@@ -6,6 +6,7 @@ import (
 	managevolume "github.com/TheAimHero/dtui/cmd/tui/manageVolume"
 	wip "github.com/TheAimHero/dtui/cmd/tui/wip"
 	"github.com/TheAimHero/dtui/internal/docker"
+	"github.com/TheAimHero/dtui/internal/ui/styles"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -25,10 +26,19 @@ func (m MainModel) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func NewModel(dockerClient docker.DockerClient) tea.Model {
-	containerModel := managecontianer.NewModel(dockerClient)
-	imageModel := manageimage.NewModel(dockerClient)
-	volumeModel := managevolume.NewModel(dockerClient)
+func NewModel(dockerClient docker.DockerClient) (tea.Model, error) {
+	containerModel, err := managecontianer.NewModel(dockerClient)
+	if err != nil {
+		return nil, styles.ErrorMessage(err.Error())
+	}
+	imageModel, err := manageimage.NewModel(dockerClient)
+	if err != nil {
+		return nil, styles.ErrorMessage(err.Error())
+	}
+	volumeModel, err := managevolume.NewModel(dockerClient)
+	if err != nil {
+		return nil, styles.ErrorMessage(err.Error())
+	}
 	wipModel := wip.NewModel()
 	model := MainModel{
 		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "Work In Progress"},
@@ -36,7 +46,7 @@ func NewModel(dockerClient docker.DockerClient) tea.Model {
 		DockerClient: dockerClient,
 		ActiveTab:    0,
 	}
-	return model
+	return model, nil
 }
 
 func NewTui() error {
@@ -44,11 +54,13 @@ func NewTui() error {
 	if err != nil {
 		return err
 	}
-	model := NewModel(dockerClient)
-	p := tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion())
+	model, err := NewModel(dockerClient)
+	if err != nil {
+		return err
+	}
+	// _, err = tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
 	// for dev purpose
-	// p := tea.NewProgram(model)
-	_, err = p.Run()
+	_, err = tea.NewProgram(model).Run()
 	if err != nil {
 		return err
 	}

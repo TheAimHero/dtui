@@ -31,7 +31,7 @@ func (m ContainerModel) Init() tea.Cmd {
 	return tea.Batch(utils.TickCommand(), m.Spinner.Tick)
 }
 
-func NewModel(dockerClient docker.DockerClient) ContainerModel {
+func NewModel(dockerClient docker.DockerClient) (ContainerModel, error) {
 	err := dockerClient.FetchContainers()
 	spinner := getSpinner()
 	help := getHelpSection()
@@ -48,8 +48,7 @@ func NewModel(dockerClient docker.DockerClient) ContainerModel {
 	}
 	m.Table = m.getTable()
 	if err != nil {
-		m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
-		m.Message.ClearMessage(message.SuccessDuration)
+		return m, err
 	}
-	return m
+	return m, nil
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
+	"github.com/TheAimHero/dtui/internal/ui/styles"
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/table"
@@ -23,7 +24,7 @@ func (m VolumeModel) Init() tea.Cmd {
 	return tea.Batch(utils.TickCommand())
 }
 
-func NewModel(dockerClient docker.DockerClient) VolumeModel {
+func NewModel(dockerClient docker.DockerClient) (VolumeModel, error) {
 	err := dockerClient.FetchVolumes()
 	help := getHelpSection()
 	m := VolumeModel{
@@ -34,8 +35,7 @@ func NewModel(dockerClient docker.DockerClient) VolumeModel {
 	}
 	m.Table = m.getTable()
 	if err != nil {
-		m.Message.AddMessage("Error while fetching volumes", message.ErrorMessage)
-		m.Message.ClearMessage(message.SuccessDuration)
+		return m, styles.ErrorMessage(err.Error())
 	}
-	return m
+	return m, nil
 }

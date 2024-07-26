@@ -2,10 +2,9 @@ package docker
 
 import (
 	"context"
-	"errors"
 	"time"
 
-	"github.com/charmbracelet/lipgloss"
+	"github.com/TheAimHero/dtui/internal/ui/styles"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/volume"
@@ -26,7 +25,7 @@ type DockerClient struct {
 }
 
 func NewDockerClient() (DockerClient, error) {
-	client, err := client.NewClientWithOpts(client.FromEnv)
+	client, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return DockerClient{}, err
 	}
@@ -34,9 +33,7 @@ func NewDockerClient() (DockerClient, error) {
 	defer cancel()
 	_, err = client.Ping(ctx)
 	if err != nil {
-		return DockerClient{}, errors.New(lipgloss.NewStyle().
-			Foreground(lipgloss.Color("#cb4154")).
-			Render("Docker is not running...\nStart Docker and try again."))
+		return DockerClient{}, styles.ErrorMessage("Docker is not running...\nStart Docker and try again.")
 	}
 	return DockerClient{client: client}, nil
 }

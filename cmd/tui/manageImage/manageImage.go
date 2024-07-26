@@ -1,8 +1,6 @@
 package manageimage
 
 import (
-	"time"
-
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
@@ -13,6 +11,7 @@ import (
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
+	"github.com/TheAimHero/dtui/internal/ui/styles"
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
@@ -46,7 +45,7 @@ func getTable(images docker.Images, selectedImages mapset.Set[string], inProcess
 	return ui_table.NewTable(tableColumns, tableRows)
 }
 
-func NewModel(dockerClient docker.DockerClient) ImageModel {
+func NewModel(dockerClient docker.DockerClient) (ImageModel, error) {
 	err := dockerClient.FetchImages()
 	m := ImageModel{
 		DockerClient:   dockerClient,
@@ -60,8 +59,7 @@ func NewModel(dockerClient docker.DockerClient) ImageModel {
 	}
 	m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.PullSpinner)
 	if err != nil {
-		m.Message.AddMessage("Error while fetching images", message.ErrorMessage)
-		m.Message.ClearMessage(2 * time.Second)
+		return m, styles.ErrorMessage(err.Error())
 	}
-	return m
+	return m, nil
 }
