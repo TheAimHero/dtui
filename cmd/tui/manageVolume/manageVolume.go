@@ -18,6 +18,8 @@ type VolumeModel struct {
 	Confirmation prompt.Model
 	Message      message.Message
 	Table        table.Model
+	Width        int
+	Height       int
 }
 
 func (m VolumeModel) Init() tea.Cmd {
@@ -32,6 +34,8 @@ func NewModel(dockerClient docker.DockerClient) (VolumeModel, error) {
 		Help:         help,
 		Message:      message.Message{},
 		Keys:         keys,
+		Width:        80,
+		Height:       40,
 	}
 	m.Table = m.getTable()
 	if err != nil {

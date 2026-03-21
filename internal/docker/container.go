@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"time"
 
@@ -9,29 +10,42 @@ import (
 )
 
 func (m *DockerClient) FetchContainers() error {
-	containers, err := m.client.ContainerList(context.Background(), container.ListOptions{All: true})
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	containers, err := m.client.ContainerList(ctx, container.ListOptions{All: true})
 	m.Containers = containers
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to fetch containers: %w", err)
+	}
+	return nil
 }
 
 func (m *DockerClient) StopContainer(containerID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	err := m.client.ContainerStop(ctx, containerID, container.StopOptions{})
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to stop container %s: %w", containerID, err)
+	}
+	return nil
 }
 
 func (m *DockerClient) StartContainer(containerID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	err := m.client.ContainerStart(ctx, containerID, container.StartOptions{})
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to start container %s: %w", containerID, err)
+	}
+	return nil
 }
 
 func (m *DockerClient) GetLogs(containerID string) (io.ReadCloser, error) {
-	stream, err := m.client.ContainerLogs(context.Background(), containerID, container.LogsOptions{Follow: true, ShowStdout: true, Details: true, ShowStderr: true, Timestamps: true})
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	stream, err := m.client.ContainerLogs(ctx, containerID, container.LogsOptions{Follow: true, ShowStdout: true, Details: true, ShowStderr: true, Timestamps: true})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get logs for container %s: %w", containerID, err)
 	}
 	return stream, nil
 }
@@ -40,5 +54,8 @@ func (m *DockerClient) DeleteContainer(containerID string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	err := m.client.ContainerRemove(ctx, containerID, container.RemoveOptions{Force: true})
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to delete container %s: %w", containerID, err)
+	}
+	return nil
 }

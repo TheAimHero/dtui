@@ -1,4 +1,4 @@
-package managecontianer
+package managecontainer
 
 import (
 	"github.com/charmbracelet/bubbles/help"

@@ -35,17 +35,17 @@ func getTableRows(volumes docker.Volumes) []table.Row {
 	return tableRows
 }
 
-func getTableColumns() []table.Column {
+func getTableColumns(width int) []table.Column {
 	return []table.Column{
-		{Title: "Name", Width: utils.FloorMul(physicalWidth, 0.2)},
-		{Title: "Created At", Width: utils.FloorMul(physicalWidth, 0.15)},
-		{Title: "Mountpoint", Width: utils.FloorMul(physicalWidth, 0.45)},
-		{Title: "Size", Width: utils.FloorMul(physicalWidth, 0.1)},
+		{Title: "Name", Width: utils.FloorMul(width, 0.2)},
+		{Title: "Created At", Width: utils.FloorMul(width, 0.15)},
+		{Title: "Mountpoint", Width: utils.FloorMul(width, 0.45)},
+		{Title: "Size", Width: utils.FloorMul(width, 0.1)},
 	}
 }
 
 func (m VolumeModel) getTable() table.Model {
-	tableColumns := getTableColumns()
+	tableColumns := getTableColumns(m.Width)
 	tableRows := getTableRows(m.DockerClient.Volumes)
 	table := ui_table.NewTable(tableColumns, tableRows)
 	return table

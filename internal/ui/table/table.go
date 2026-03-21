@@ -8,17 +8,21 @@ import (
 var (
 	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
 	BaseTableStyle = lipgloss.NewStyle().
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderForeground(HighlightColor).
 			Padding(1, 1)
 )
+
+func Centered(width int) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Width(width).
+		Align(lipgloss.Center).
+		Padding(1, 1)
+}
 
 func NewTable(tableColumns []table.Column, tableRows []table.Row) table.Model {
 	t := table.New(
 		table.WithColumns(tableColumns),
 		table.WithRows(tableRows),
 		table.WithFocused(true),
-		table.WithHeight(10),
 	)
 	t.KeyMap.HalfPageDown.Unbind()
 	t.KeyMap.HalfPageUp.Unbind()
@@ -29,9 +33,6 @@ func NewTable(tableColumns []table.Column, tableRows []table.Row) table.Model {
 
 	s := table.DefaultStyles()
 	s.Header = s.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
 		Bold(false)
 	s.Selected = s.Selected.
 		Foreground(lipgloss.Color("229")).

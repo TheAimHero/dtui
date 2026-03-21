@@ -2,6 +2,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/styles"
@@ -27,13 +28,13 @@ type DockerClient struct {
 func NewDockerClient() (DockerClient, error) {
 	client, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		return DockerClient{}, err
+		return DockerClient{}, fmt.Errorf("failed to create docker client: %w", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	_, err = client.Ping(ctx)
 	if err != nil {
-		return DockerClient{}, styles.ErrorMessage("Docker is not running...\nStart Docker and try again.")
+		return DockerClient{}, fmt.Errorf("docker connection failed: %w", styles.ErrorMessage("Docker is not running...\nStart Docker and try again."))
 	}
 	return DockerClient{client: client}, nil
 }

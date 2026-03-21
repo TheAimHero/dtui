@@ -2,48 +2,63 @@ package manageimage
 
 import (
 	"fmt"
-	"os"
-	"sort"
 	"strings"
 	"time"
 
-	"golang.org/x/term"
-
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
-	ui_utils "github.com/TheAimHero/dtui/internal/ui/utils"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type ShowTextInput struct{}
 
-var (
-	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
-	successDuration                  = 2 * time.Second
-	errorDuration                    = 5 * time.Second
+const (
+	successDuration = 2 * time.Second
+	errorDuration   = 5 * time.Second
 )
 
 func (m ImageModel) pullImage() string {
-	images := m.PullProgress.ToSlice()
-	sort.SliceStable(images, func(i, j int) bool { return images[i] > images[j] })
-	return fmt.Sprintf("%s\tPulling images: %s", m.PullSpinner.View(), strings.Join(images, ", "))
+	var lines []string
+	m.PullProgress.Range(func(key, value any) bool {
+		imageName := key.(string)
+		info := value.(PullProgressInfo)
+		line := fmt.Sprintf("%s %s", m.PullSpinner.View(), imageName)
+		if info.Progress != nil && info.Progress.Total > 0 {
+			percent := float64(info.Progress.Current) / float64(info.Progress.Total) * 100
+			line += fmt.Sprintf(": %s (%.0f%%)", info.Status, percent)
+		} else {
+			line += fmt.Sprintf(": %s", info.Status)
+		}
+		lines = append(lines, line)
+		return true
+	})
+	return strings.Join(lines, "\n")
 }
 
 func (m ImageModel) View() string {
 	doc := strings.Builder{}
-	doc.WriteString(ui_table.BaseTableStyle.Render(m.Table.View()))
+	doc.WriteString(ui_table.Centered(m.Width).Render(m.Table.View()))
 	if m.Input.Focused() || m.Input.Value() != "" {
 		doc.WriteString("\n" + lipgloss.NewStyle().Padding(1, 0, 0, 0).Render(m.Input.View()))
 	} else {
 		doc.WriteString(strings.Repeat("\n", 2))
 	}
-	doc.WriteString("\n" + m.Conformation.View())
-	doc.WriteString("\n" + m.Message.ShowMessage())
-	doc.WriteString("\n" + m.Help.View(m.Keys))
-	if m.PullProgress.Cardinality() > 0 {
-		doc.WriteString("\n" + lipgloss.PlaceVertical(physicalHeight-lipgloss.Height(doc.String())-10, lipgloss.Bottom, m.pullImage()))
+	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Conformation.View()))
+	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Message.ShowMessage()))
+	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Help.View(m.Keys)))
+	count := 0
+	m.PullProgress.Range(func(_, _ any) bool {
+		count++
+		return false
+	})
+	if count > 0 {
+		doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.pullImage()))
 	} else {
 		doc.WriteString("\n")
 	}
-	doc.WriteString(strings.Repeat("\n", ui_utils.HeightPadding(doc, 8)))
+	padding := m.Height - lipgloss.Height(doc.String()) - 8
+	if padding < 0 {
+		padding = 0
+	}
+	doc.WriteString(strings.Repeat("\n", padding))
 	return doc.String()
 }

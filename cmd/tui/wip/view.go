@@ -1,19 +1,12 @@
 package wip
 
 import (
-	"os"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/term"
 
 	"github.com/TheAimHero/dtui/internal/ui/utils"
-)
-
-var (
-	// nolint:unused
-	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
 )
 
 func (m WipModel) View() string {
@@ -36,7 +29,8 @@ func (m WipModel) View() string {
 func (m WipModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+		m.Width = msg.Width
+		m.Height = msg.Height
 		return m, nil
 
 	case tea.KeyMsg:

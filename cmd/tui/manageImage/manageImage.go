@@ -1,6 +1,8 @@
 package manageimage
 
 import (
+	"sync"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
@@ -18,7 +20,7 @@ import (
 
 type ImageModel struct {
 	SelectedImages mapset.Set[string]
-	PullProgress   mapset.Set[string]
+	PullProgress   *sync.Map
 	InProgress     mapset.Set[string]
 	PullSpinner    spinner.Model
 	LoadingSpinner spinner.Model
@@ -29,7 +31,11 @@ type ImageModel struct {
 	Input          textinput.Model
 	Conformation   prompt.Model
 	Table          table.Model
+	Width          int
+	Height         int
 }
+
+type PullProgressInfo = docker.PullProgressInfo
 
 func (m ImageModel) Init() tea.Cmd {
 	var (
@@ -39,8 +45,8 @@ func (m ImageModel) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func getTable(images docker.Images, selectedImages mapset.Set[string], inProcesss mapset.Set[string], spinner spinner.Model) table.Model {
-	tableColumns := getTableColumns()
+func getTable(images docker.Images, selectedImages mapset.Set[string], inProcesss mapset.Set[string], spinner spinner.Model, width int) table.Model {
+	tableColumns := getTableColumns(width)
 	tableRows := getTableRows(images, selectedImages, inProcesss, spinner)
 	return ui_table.NewTable(tableColumns, tableRows)
 }
@@ -54,10 +60,12 @@ func NewModel(dockerClient docker.DockerClient) (ImageModel, error) {
 		LoadingSpinner: getSpinner(spinner.Points),
 		SelectedImages: mapset.NewSet[string](),
 		InProgress:     mapset.NewSet[string](),
-		PullProgress:   mapset.NewSet[string](),
+		PullProgress:   &sync.Map{},
 		Keys:           keys,
+		Width:          80,
+		Height:         40,
 	}
-	m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.PullSpinner)
+	m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.PullSpinner, m.Width)
 	if err != nil {
 		return m, styles.ErrorMessage(err.Error())
 	}

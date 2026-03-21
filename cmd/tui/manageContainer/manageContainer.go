@@ -1,4 +1,4 @@
-package managecontianer
+package managecontainer
 
 import (
 	"github.com/charmbracelet/bubbles/help"
@@ -25,6 +25,8 @@ type ContainerModel struct {
 	Input              textinput.Model
 	Spinner            spinner.Model
 	Table              table.Model
+	Width              int
+	Height             int
 }
 
 func (m ContainerModel) Init() tea.Cmd {
@@ -45,6 +47,8 @@ func NewModel(dockerClient docker.DockerClient) (ContainerModel, error) {
 		Message:            message.Message{},
 		Keys:               keys,
 		Input:              input,
+		Width:              80,
+		Height:             40,
 	}
 	m.Table = m.getTable()
 	if err != nil {

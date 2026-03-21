@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -75,15 +76,33 @@ func (m ImageModel) PullImage() (ImageModel, tea.Cmd) {
 	}
 	pullMsg := message.Message{}
 	return m, func() tea.Msg {
-		m.PullProgress.Add(imageName)
+		progressChan := make(chan docker.PullProgressEvent, 100)
+		doneChan := make(chan struct{})
+		go func() {
+			m.DockerClient.PullImage(imageName, progressChan)
+			close(doneChan)
+		}()
+		go func() {
+			for {
+				select {
+				case event, ok := <-progressChan:
+					if !ok {
+						return
+					}
+					m.PullProgress.Store(imageName, docker.PullProgressInfo{
+						ID:       event.ID,
+						Status:   event.Status,
+						Progress: event.Progress,
+					})
+				case <-doneChan:
+					close(progressChan)
+					return
+				}
+			}
+		}()
+		<-doneChan
 		curTime := time.Now()
-		_, err := m.DockerClient.PullImage(imageName)
-		if err != nil {
-			pullMsg.AddMessage("Error while pulling image: "+imageName, message.ErrorMessage)
-			m.PullProgress.Remove(imageName)
-			return pullMsg
-		}
-		m.PullProgress.Remove(imageName)
+		m.PullProgress.Delete(imageName)
 		pullMsg.AddMessage(fmt.Sprintf("Image %s pulled in %s", imageName, time.Since(curTime)), message.SuccessMessage)
 		return pullMsg
 	}

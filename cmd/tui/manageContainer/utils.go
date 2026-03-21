@@ -1,4 +1,4 @@
-package managecontianer
+package managecontainer
 
 import (
 	"strings"
@@ -54,19 +54,19 @@ func getTableRows(containers docker.Containers, selectedContainers mapset.Set[st
 	return tableRows
 }
 
-func getTableColumns() []table.Column {
+func getTableColumns(width int) []table.Column {
 	return []table.Column{
-		{Title: "Select", Width: utils.FloorMul(physicalWidth, 0.05)},
-		{Title: "Loading", Width: utils.FloorMul(physicalWidth, 0.05)},
-		{Title: "ID", Width: utils.FloorMul(physicalWidth, 0.1)},
-		{Title: "Name", Width: utils.FloorMul(physicalWidth, 0.3)},
-		{Title: "Image", Width: utils.FloorMul(physicalWidth, 0.2)},
-		{Title: "Status", Width: utils.FloorMul(physicalWidth, 0.2)},
+		{Title: "Select", Width: utils.FloorMul(width, 0.05)},
+		{Title: "Loading", Width: utils.FloorMul(width, 0.05)},
+		{Title: "ID", Width: utils.FloorMul(width, 0.1)},
+		{Title: "Name", Width: utils.FloorMul(width, 0.3)},
+		{Title: "Image", Width: utils.FloorMul(width, 0.2)},
+		{Title: "Status", Width: utils.FloorMul(width, 0.2)},
 	}
 }
 
 func (m ContainerModel) getTable() table.Model {
-	tableColumns := getTableColumns()
+	tableColumns := getTableColumns(m.Width)
 	tableRows := getTableRows(
 		m.DockerClient.Containers,
 		m.SelectedContainers,

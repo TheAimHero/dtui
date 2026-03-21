@@ -1,7 +1,6 @@
 package manageimage
 
 import (
-	"os"
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
@@ -10,7 +9,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"golang.org/x/term"
 )
 
 type ActionType int
@@ -70,8 +68,18 @@ func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
-		m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.LoadingSpinner)
+		m.Width = msg.Width
+		m.Height = msg.Height
+		m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.LoadingSpinner, m.Width)
+		maxTableHeight := (m.Height * 50) / 100
+		tableHeight := m.Height - 14
+		if tableHeight < 5 {
+			tableHeight = 5
+		}
+		if tableHeight > maxTableHeight {
+			tableHeight = maxTableHeight
+		}
+		m.Table.SetHeight(tableHeight)
 
 	case message.ClearMessage:
 		m.Message = message.Message{}

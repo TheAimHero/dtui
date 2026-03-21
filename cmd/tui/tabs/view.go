@@ -1,12 +1,10 @@
 package tabs
 
 import (
-	"os"
 	"strings"
 
 	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/term"
 )
 
 const (
@@ -41,13 +39,6 @@ var (
 	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui_table.HighlightColor)
 	padTabStyle      = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
 	activeTabStyle   = inactiveTabStyle.Border(activeTabBorder, true)
-	windowStyle      = lipgloss.NewStyle().
-				BorderForeground(ui_table.HighlightColor).
-				Align(lipgloss.Center).
-				Border(lipgloss.NormalBorder()).
-				UnsetBorderTop().
-				Padding(2, 0)
-	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
 )
 
 func TabView(m MainModel) string {
@@ -80,7 +71,7 @@ func (m MainModel) View() string {
 		renderedTabs = append(renderedTabs, style.Render(m.TabsTitle[i]))
 	}
 	row := lipgloss.JoinHorizontal(lipgloss.Top, renderedTabs...)
-	repeatCount := physicalWidth - lipgloss.Width(row) - 1
+	repeatCount := m.Width - lipgloss.Width(row)
 	if repeatCount < 0 {
 		repeatCount = 0
 	}
@@ -88,6 +79,6 @@ func (m MainModel) View() string {
 	row = lipgloss.JoinHorizontal(lipgloss.Bottom, row, paddingBorder)
 	doc.WriteString(row)
 
-	doc.WriteString(windowStyle.Width((physicalWidth - windowStyle.GetHorizontalFrameSize())).Render(TabView(m)))
-	return docStyle.Render(doc.String())
+	doc.WriteString(TabView(m))
+	return doc.String()
 }

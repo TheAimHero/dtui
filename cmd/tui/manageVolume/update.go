@@ -1,7 +1,6 @@
 package managevolume
 
 import (
-	"os"
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
@@ -9,7 +8,6 @@ import (
 	"github.com/TheAimHero/dtui/internal/utils"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"golang.org/x/term"
 )
 
 type ActionType int
@@ -38,8 +36,18 @@ func (m VolumeModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+		m.Width = msg.Width
+		m.Height = msg.Height
+		maxTableHeight := (m.Height * 50) / 100
+		tableHeight := m.Height - 10
+		if tableHeight < 5 {
+			tableHeight = 5
+		}
+		if tableHeight > maxTableHeight {
+			tableHeight = maxTableHeight
+		}
 		m.Table = m.getTable()
+		m.Table.SetHeight(tableHeight)
 
 	case message.ClearMessage:
 		m.Message = message.Message{}

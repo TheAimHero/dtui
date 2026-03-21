@@ -1,11 +1,16 @@
 package wip
 
 import (
+	"os"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/term"
 )
 
 type WipModel struct {
-	Title string
+	Title  string
+	Width  int
+	Height int
 }
 
 func (m WipModel) Init() tea.Cmd {
@@ -13,7 +18,10 @@ func (m WipModel) Init() tea.Cmd {
 }
 
 func NewModel() WipModel {
+	width, height, _ := term.GetSize(int(os.Stdout.Fd()))
 	return WipModel{
-		Title: "Work In Progress",
+		Title:  "Work In Progress",
+		Width:  width,
+		Height: height,
 	}
 }

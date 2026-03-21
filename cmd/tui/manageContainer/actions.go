@@ -1,9 +1,10 @@
-package managecontianer
+package managecontainer
 
 import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
@@ -48,6 +49,8 @@ func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
 	startMsg := message.Message{}
 	defer m.ClearSelectedContainers()
 	errors := make([]string, 0)
+	var errorsMu sync.Mutex
+	var wg sync.WaitGroup
 	if m.SelectedContainers.Cardinality() == 0 {
 		return startContainer(m)
 	}
@@ -62,15 +65,20 @@ func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
 	}
 	return m, func() tea.Msg {
 		for _, containerID := range toStart {
+			wg.Add(1)
 			go func(containerID string) {
+				defer wg.Done()
 				m.InProcess.Add(containerID)
 				err := m.DockerClient.StartContainer(containerID)
 				if err != nil {
+					errorsMu.Lock()
 					errors = append(errors, err.Error())
+					errorsMu.Unlock()
 				}
 				m.InProcess.Remove(containerID)
 			}(containerID)
 		}
+		wg.Wait()
 		if len(errors) > 0 {
 			startMsg.AddMessage("Error while starting some containers", message.ErrorMessage)
 			m.SelectedContainers.Clear()
@@ -104,6 +112,8 @@ func stopContainer(m ContainerModel) (ContainerModel, tea.Cmd) {
 
 func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 	errors := make([]string, 0)
+	var errorsMu sync.Mutex
+	var wg sync.WaitGroup
 	selectedContainers := m.SelectedContainers.ToSlice()
 	stopMsg := message.Message{}
 	if m.SelectedContainers.Cardinality() == 0 {
@@ -121,15 +131,20 @@ func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 	defer m.ClearSelectedContainers()
 	return m, func() tea.Msg {
 		for _, containerID := range selectedContainers {
+			wg.Add(1)
 			go func(containerID string) {
+				defer wg.Done()
 				m.InProcess.Add(containerID)
 				err := m.DockerClient.StopContainer(containerID)
 				if err != nil {
+					errorsMu.Lock()
 					errors = append(errors, err.Error())
+					errorsMu.Unlock()
 				}
 				m.InProcess.Remove(containerID)
 			}(containerID)
 		}
+		wg.Wait()
 		if len(errors) > 0 {
 			stopMsg.AddMessage("Error while stopping some containers", message.ErrorMessage)
 			m.SelectedContainers.Clear()
@@ -178,17 +193,24 @@ func (m ContainerModel) DeleteContainers() (ContainerModel, tea.Cmd) {
 	}
 	deleteMsg := message.Message{}
 	errors := make([]string, 0)
+	var errorsMu sync.Mutex
+	var wg sync.WaitGroup
 	return m, func() tea.Msg {
 		for _, containerID := range toDelete {
+			wg.Add(1)
 			go func(containerID string) {
+				defer wg.Done()
 				m.InProcess.Add(containerID)
 				err := m.DockerClient.DeleteContainer(containerID)
 				if err != nil {
+					errorsMu.Lock()
 					errors = append(errors, err.Error())
+					errorsMu.Unlock()
 				}
 				m.InProcess.Remove(containerID)
 			}(containerID)
 		}
+		wg.Wait()
 		if len(errors) > 0 {
 			deleteMsg.AddMessage("Error while deleting some containers", message.ErrorMessage)
 			m.SelectedContainers.Clear()

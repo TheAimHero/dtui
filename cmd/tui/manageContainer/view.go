@@ -1,4 +1,4 @@
-package managevolume
+package managecontainer
 
 import (
 	"strings"
@@ -7,10 +7,15 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func (m VolumeModel) View() string {
+func (m ContainerModel) View() string {
 	doc := strings.Builder{}
 	doc.WriteString(ui_table.Centered(m.Width).Render(m.Table.View()))
 	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Confirmation.View()))
+	if m.Input.Focused() || m.Input.Value() != "" {
+		doc.WriteString("\n" + lipgloss.NewStyle().Padding(1, 0, 0, 0).Render(m.Input.View()))
+	} else {
+		doc.WriteString(strings.Repeat("\n", 2))
+	}
 	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Message.ShowMessage()))
 	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Help.View(m.Keys)))
 	padding := m.Height - lipgloss.Height(doc.String()) - 8

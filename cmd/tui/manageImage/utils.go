@@ -65,13 +65,13 @@ func getTableRows(images docker.Images, selectedRows mapset.Set[string], inProce
 	return tableRows
 }
 
-func getTableColumns() []table.Column {
+func getTableColumns(width int) []table.Column {
 	return []table.Column{
-		{Title: "Select", Width: utils.FloorMul(physicalWidth , 0.05)},
-		{Title: "Loading", Width: utils.FloorMul(physicalWidth , 0.05)},
-		{Title: "ID", Width: utils.FloorMul(physicalWidth , 0.1)},
-		{Title: "Name", Width: utils.FloorMul(physicalWidth , 0.4)},
-		{Title: "Created", Width: utils.FloorMul(physicalWidth , 0.2)},
-		{Title: "Size", Width: utils.FloorMul(physicalWidth , 0.1)},
+		{Title: "Select", Width: utils.FloorMul(width, 0.05)},
+		{Title: "Loading", Width: utils.FloorMul(width, 0.05)},
+		{Title: "ID", Width: utils.FloorMul(width, 0.1)},
+		{Title: "Name", Width: utils.FloorMul(width, 0.4)},
+		{Title: "Created", Width: utils.FloorMul(width, 0.2)},
+		{Title: "Size", Width: utils.FloorMul(width, 0.1)},
 	}
 }

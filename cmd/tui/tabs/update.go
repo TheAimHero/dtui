@@ -1,26 +1,24 @@
 package tabs
 
 import (
-	"os"
 	"strconv"
 
-	managecontianer "github.com/TheAimHero/dtui/cmd/tui/manageContianer"
+	managecontainer "github.com/TheAimHero/dtui/cmd/tui/manageContainer"
 	manageimage "github.com/TheAimHero/dtui/cmd/tui/manageImage"
 	tea "github.com/charmbracelet/bubbletea"
-	"golang.org/x/term"
 )
 
 func (m MainModel) getNextTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.ActiveTab = (m.ActiveTab + 1) % len(m.Tabs)
-	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(tea.WindowSizeMsg{Width: m.Width, Height: m.Height})
 	return m, tea.Sequence(m.Tabs[m.ActiveTab%len(m.Tabs)].Init(), cmd)
 }
 
 func (m MainModel) getPrevTab(_ tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.ActiveTab = (m.ActiveTab - 1 + len(m.Tabs)) % len(m.Tabs)
-	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+	m.Tabs[m.ActiveTab%len(m.Tabs)], cmd = m.Tabs[m.ActiveTab%len(m.Tabs)].Update(tea.WindowSizeMsg{Width: m.Width, Height: m.Height})
 	return m, tea.Sequence(m.Tabs[m.ActiveTab%len(m.Tabs)].Init(), cmd)
 }
 
@@ -35,7 +33,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd  tea.Cmd
 		cmds []tea.Cmd
 	)
-	if s, ok := m.Tabs[m.ActiveTab].(managecontianer.ContainerModel); ok && s.Input.Focused() {
+	if s, ok := m.Tabs[m.ActiveTab].(managecontainer.ContainerModel); ok && s.Input.Focused() {
 		m.Tabs[m.ActiveTab], cmd = s.Update(msg)
 		return m, cmd
 	}
@@ -51,7 +49,7 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.ActiveTab = tabNo - 1
 			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(msg)
 			cmds = append(cmds, cmd)
-			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+			m.Tabs[m.ActiveTab], cmd = m.Tabs[m.ActiveTab].Update(tea.WindowSizeMsg{Width: m.Width, Height: m.Height})
 			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
 
@@ -69,8 +67,9 @@ func (m MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case tea.WindowSizeMsg:
-		physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
-		return m.updateCurrentTab(tea.WindowSizeMsg{Width: physicalWidth, Height: physicalHeight})
+		m.Width = msg.Width
+		m.Height = msg.Height
+		return m.updateCurrentTab(tea.WindowSizeMsg{Width: msg.Width, Height: msg.Height})
 
 	default:
 		return m.updateCurrentTab(msg)

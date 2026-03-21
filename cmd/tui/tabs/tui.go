@@ -1,7 +1,7 @@
 package tabs
 
 import (
-	managecontianer "github.com/TheAimHero/dtui/cmd/tui/manageContianer"
+	managecontainer "github.com/TheAimHero/dtui/cmd/tui/manageContainer"
 	manageimage "github.com/TheAimHero/dtui/cmd/tui/manageImage"
 	managevolume "github.com/TheAimHero/dtui/cmd/tui/manageVolume"
 	wip "github.com/TheAimHero/dtui/cmd/tui/wip"
@@ -16,6 +16,8 @@ type MainModel struct {
 	TabsTitle    []string
 	Tabs         []tea.Model
 	ActiveTab    int
+	Width        int
+	Height       int
 }
 
 func (m MainModel) Init() tea.Cmd {
@@ -27,7 +29,7 @@ func (m MainModel) Init() tea.Cmd {
 }
 
 func NewModel(dockerClient docker.DockerClient) (tea.Model, error) {
-	containerModel, err := managecontianer.NewModel(dockerClient)
+	containerModel, err := managecontainer.NewModel(dockerClient)
 	if err != nil {
 		return nil, styles.ErrorMessage(err.Error())
 	}
@@ -45,6 +47,8 @@ func NewModel(dockerClient docker.DockerClient) (tea.Model, error) {
 		Tabs:         []tea.Model{&containerModel, &imageModel, &volumeModel, &wipModel},
 		DockerClient: dockerClient,
 		ActiveTab:    0,
+		Width:        80,
+		Height:       40,
 	}
 	return model, nil
 }
