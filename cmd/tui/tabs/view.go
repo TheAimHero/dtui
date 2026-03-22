@@ -3,7 +3,7 @@ package tabs
 import (
 	"strings"
 
-	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -36,8 +36,8 @@ var (
 		BottomRight: "┴",
 	}
 	docStyle         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
-	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(ui_table.HighlightColor)
-	padTabStyle      = lipgloss.NewStyle().Foreground(ui_table.HighlightColor)
+	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(components.HighlightColor)
+	padTabStyle      = lipgloss.NewStyle().Foreground(components.HighlightColor)
 	activeTabStyle   = inactiveTabStyle.Border(activeTabBorder, true)
 )
 

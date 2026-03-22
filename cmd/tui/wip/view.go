@@ -3,10 +3,9 @@ package wip
 import (
 	"strings"
 
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-
-	"github.com/TheAimHero/dtui/internal/ui/utils"
 )
 
 func (m WipModel) View() string {
@@ -22,7 +21,7 @@ func (m WipModel) View() string {
 	doc.WriteString(emphasisStyle.Render("-\tLog Mode"))
 	doc.WriteString(titleStyle.UnsetPadding().Render("\nGive a Star on GitHub\n"))
 	doc.WriteString(titleStyle.Render("Thats all folks!"))
-	doc.WriteString(strings.Repeat("\n", utils.HeightPadding(doc, 8)))
+	doc.WriteString(strings.Repeat("\n", components.HeightPadding(doc, 8)))
 	return doc.String()
 }
 

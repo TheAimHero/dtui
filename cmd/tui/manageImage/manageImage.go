@@ -12,8 +12,6 @@ import (
 	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
-	"github.com/TheAimHero/dtui/internal/ui/styles"
-	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
@@ -44,7 +42,7 @@ func (m ImageModel) Init() tea.Cmd {
 func getTable(images docker.Images, selectedImages mapset.Set[string], inProcess mapset.Set[string], spinner spinner.Model, width int) table.Model {
 	tableColumns := getTableColumns(width)
 	tableRows := getTableRows(images, selectedImages, inProcess, spinner)
-	return ui_table.NewTable(tableColumns, tableRows)
+	return components.NewStandardTable(tableColumns, tableRows)
 }
 
 func NewModel(imageSvc docker.ImageService) (ImageModel, error) {
@@ -63,7 +61,7 @@ func NewModel(imageSvc docker.ImageService) (ImageModel, error) {
 	}
 	m.Table = getTable(m.Images, m.SelectedImages, m.InProgress, m.PullSpinner, m.BaseModel.Width)
 	if err != nil {
-		return m, styles.ErrorMessage(err.Error())
+		return m, components.ErrorMessage(err.Error())
 	}
 	return m, nil
 }

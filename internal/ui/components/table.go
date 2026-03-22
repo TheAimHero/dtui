@@ -5,6 +5,17 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+var (
+	HighlightColor = lipgloss.AdaptiveColor{Light: "#874BFD", Dark: "#7D56F4"}
+)
+
+func Centered(width int) lipgloss.Style {
+	return lipgloss.NewStyle().
+		Width(width).
+		Align(lipgloss.Center).
+		Padding(1, 1)
+}
+
 const (
 	DefaultMinTableHeight = 5
 	DefaultMaxTableRatio  = 0.5

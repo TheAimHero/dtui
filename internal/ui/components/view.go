@@ -1,11 +1,24 @@
 package components
 
 import (
+	"os"
 	"strings"
 
-	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/term"
 )
+
+var (
+	_, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
+)
+
+func HeightPadding(doc strings.Builder, fixHeight int) int {
+	paddingHeight := physicalHeight - lipgloss.Height(doc.String()) - fixHeight
+	if paddingHeight < 0 {
+		paddingHeight = 0
+	}
+	return paddingHeight
+}
 
 type ViewBuilder struct {
 	width   int
@@ -23,7 +36,7 @@ func NewViewBuilder(width, height int) *ViewBuilder {
 }
 
 func (vb *ViewBuilder) AddCentered(view string) *ViewBuilder {
-	vb.doc.WriteString("\n" + ui_table.Centered(vb.width).Render(view))
+	vb.doc.WriteString("\n" + Centered(vb.width).Render(view))
 	return vb
 }
 

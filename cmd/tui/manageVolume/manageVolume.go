@@ -5,7 +5,6 @@ import (
 	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
-	"github.com/TheAimHero/dtui/internal/ui/styles"
 	"github.com/TheAimHero/dtui/internal/utils"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
@@ -41,7 +40,7 @@ func NewModel(volumeSvc docker.VolumeService) (VolumeModel, error) {
 	}
 	m.Table = m.getTable()
 	if err != nil {
-		return m, styles.ErrorMessage(err.Error())
+		return m, components.ErrorMessage(err.Error())
 	}
 	return m, nil
 }

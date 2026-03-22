@@ -6,7 +6,7 @@ import (
 	managevolume "github.com/TheAimHero/dtui/cmd/tui/manageVolume"
 	wip "github.com/TheAimHero/dtui/cmd/tui/wip"
 	"github.com/TheAimHero/dtui/internal/docker"
-	"github.com/TheAimHero/dtui/internal/ui/styles"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -33,15 +33,15 @@ func (m MainModel) Init() tea.Cmd {
 func NewModel(containerSvc docker.ContainerService, imageSvc docker.ImageService, volumeSvc docker.VolumeService) (tea.Model, error) {
 	containerModel, err := managecontainer.NewModel(containerSvc)
 	if err != nil {
-		return nil, styles.ErrorMessage(err.Error())
+		return nil, components.ErrorMessage(err.Error())
 	}
 	imageModel, err := manageimage.NewModel(imageSvc)
 	if err != nil {
-		return nil, styles.ErrorMessage(err.Error())
+		return nil, components.ErrorMessage(err.Error())
 	}
 	volumeModel, err := managevolume.NewModel(volumeSvc)
 	if err != nil {
-		return nil, styles.ErrorMessage(err.Error())
+		return nil, components.ErrorMessage(err.Error())
 	}
 	wipModel := wip.NewModel()
 	model := MainModel{
