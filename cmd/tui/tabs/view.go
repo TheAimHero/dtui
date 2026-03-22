@@ -35,7 +35,6 @@ var (
 		BottomLeft:  "┴",
 		BottomRight: "┴",
 	}
-	docStyle         = lipgloss.NewStyle().Padding(0, 0, 0, 0)
 	inactiveTabStyle = lipgloss.NewStyle().Border(tabBorder, true).BorderForeground(components.HighlightColor)
 	padTabStyle      = lipgloss.NewStyle().Foreground(components.HighlightColor)
 	activeTabStyle   = inactiveTabStyle.Border(activeTabBorder, true)

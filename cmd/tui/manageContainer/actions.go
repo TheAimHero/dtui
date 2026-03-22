@@ -275,6 +275,7 @@ func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("Invalid container ID", message.ErrorMessage)
 		return m, m.Message.ClearMessage(message.ErrorDuration)
 	}
+	//nolint:gosec // G204: containerID validated by isValidContainerID()
 	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh")
 	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }
@@ -294,6 +295,7 @@ func (m ContainerModel) ShowLogs() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("Invalid container ID", message.ErrorMessage)
 		return m, m.Message.ClearMessage(message.ErrorDuration)
 	}
+	//nolint:gosec // G204: containerID validated by isValidContainerID()
 	c := exec.Command("docker", "logs", containerID, "--follow")
 	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }

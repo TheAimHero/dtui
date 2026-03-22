@@ -2,7 +2,6 @@ package managecontainer
 
 import (
 	"github.com/TheAimHero/dtui/internal/ui/components"
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 )
 
@@ -91,8 +90,4 @@ var keys = keyMap{
 		key.WithKeys("e"),
 		key.WithHelp("e", "exec into container"),
 	),
-}
-
-func getHelpSection() help.Model {
-	return components.NewDefaultHelpModel()
 }

@@ -2,7 +2,6 @@ package managecontainer
 
 import (
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
@@ -74,13 +73,6 @@ func (m ContainerModel) getTable() table.Model {
 		m.Spinner,
 	)
 	return components.NewStandardTable(tableColumns, tableRows)
-}
-
-func getSpinner() spinner.Model {
-	s := spinner.New()
-	s.Spinner = spinner.Points
-	s.Spinner.FPS = 300 * time.Millisecond
-	return s
 }
 
 func getInput() textinput.Model {

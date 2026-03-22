@@ -2,7 +2,6 @@ package manageimage
 
 import (
 	"github.com/TheAimHero/dtui/internal/ui/components"
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 )
 
@@ -74,8 +73,4 @@ var keys = keyMap{
 		key.WithDisabled(),
 		key.WithHelp("enter", "submit"),
 	),
-}
-
-func getHelpSection() help.Model {
-	return components.NewDefaultHelpModel()
 }

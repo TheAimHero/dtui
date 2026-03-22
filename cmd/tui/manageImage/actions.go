@@ -18,6 +18,7 @@ type PullProgressMsg struct {
 type PullCompleteMsg struct {
 	ImageName string
 	Duration  time.Duration
+	Err       error
 }
 
 const (
@@ -91,7 +92,14 @@ func (m ImageModel) PullImage() (ImageModel, tea.Cmd) {
 	// pullCmd runs the image pull and returns PullCompleteMsg when done
 	pullCmd := func() tea.Msg {
 		startTime := time.Now()
-		m.ImageSvc.PullImage(imageName, progressChan)
+		if err := m.ImageSvc.PullImage(imageName, progressChan); err != nil {
+			close(progressChan)
+			return PullCompleteMsg{
+				ImageName: imageName,
+				Duration:  time.Since(startTime),
+				Err:       err,
+			}
+		}
 		close(progressChan)
 		return PullCompleteMsg{
 			ImageName: imageName,

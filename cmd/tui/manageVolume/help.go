@@ -2,7 +2,6 @@ package managevolume
 
 import (
 	"github.com/TheAimHero/dtui/internal/ui/components"
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 )
 
@@ -63,8 +62,4 @@ var keys = keyMap{
 		key.WithKeys("d"),
 		key.WithHelp("d", "delete volume"),
 	),
-}
-
-func getHelpSection() help.Model {
-	return components.NewDefaultHelpModel()
 }

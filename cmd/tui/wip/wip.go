@@ -1,9 +1,8 @@
 package wip
 
 import (
-	"os"
-
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/sys/unix"
 	"golang.org/x/term"
 )
 
@@ -18,7 +17,7 @@ func (m WipModel) Init() tea.Cmd {
 }
 
 func NewModel() WipModel {
-	width, height, _ := term.GetSize(int(os.Stdout.Fd()))
+	width, height, _ := term.GetSize(unix.Stdout)
 	return WipModel{
 		Title:  "Work In Progress",
 		Width:  width,
