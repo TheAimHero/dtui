@@ -12,15 +12,18 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
-func (m *DockerClient) FetchImages() error {
+func (m *DockerClient) FetchImages() (Images, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	images, err := m.client.ImageList(ctx, image.ListOptions{ContainerCount: true, All: true})
-	m.Images = images
 	if err != nil {
-		return fmt.Errorf("failed to fetch images: %w", err)
+		return nil, fmt.Errorf("failed to fetch images: %w", err)
 	}
-	return nil
+	result := make(Images, len(images))
+	for i, img := range images {
+		result[i] = ImageFromAPI(img)
+	}
+	return result, nil
 }
 
 func (m *DockerClient) DeleteImage(imageID string) error {
@@ -63,7 +66,7 @@ type PullProgressInfo struct {
 }
 
 func (m *DockerClient) PullImage(imageName string, progressChan chan<- PullProgressEvent) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 	stream, err := m.client.ImagePull(ctx, imageName, image.PullOptions{})
 	if err != nil {

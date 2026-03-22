@@ -3,14 +3,13 @@ package manageimage
 import (
 	"sync"
 
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/ui/styles"
@@ -19,20 +18,17 @@ import (
 )
 
 type ImageModel struct {
+	*components.BaseModel
+	ImageSvc       docker.ImageService
+	Images         docker.Images
 	SelectedImages mapset.Set[string]
-	PullProgress   *sync.Map
 	InProgress     mapset.Set[string]
+	PullProgress   *sync.Map
 	PullSpinner    spinner.Model
-	LoadingSpinner spinner.Model
-	Help           help.Model
-	Keys           keyMap
-	DockerClient   docker.DockerClient
+	Confirmation   prompt.Model
 	Message        message.Message
-	Input          textinput.Model
-	Conformation   prompt.Model
-	Table          table.Model
-	Width          int
-	Height         int
+	Keys           keyMap
+	LoadingSpinner spinner.Model
 }
 
 type PullProgressInfo = docker.PullProgressInfo
@@ -45,27 +41,27 @@ func (m ImageModel) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func getTable(images docker.Images, selectedImages mapset.Set[string], inProcesss mapset.Set[string], spinner spinner.Model, width int) table.Model {
+func getTable(images docker.Images, selectedImages mapset.Set[string], inProcess mapset.Set[string], spinner spinner.Model, width int) table.Model {
 	tableColumns := getTableColumns(width)
-	tableRows := getTableRows(images, selectedImages, inProcesss, spinner)
+	tableRows := getTableRows(images, selectedImages, inProcess, spinner)
 	return ui_table.NewTable(tableColumns, tableRows)
 }
 
-func NewModel(dockerClient docker.DockerClient) (ImageModel, error) {
-	err := dockerClient.FetchImages()
+func NewModel(imageSvc docker.ImageService) (ImageModel, error) {
+	images, err := imageSvc.FetchImages()
+	base := components.NewBaseModel(80, 40)
 	m := ImageModel{
-		DockerClient:   dockerClient,
-		Help:           getHelpSection(),
+		BaseModel:      &base,
+		ImageSvc:       imageSvc,
+		Images:         images,
 		PullSpinner:    getSpinner(spinner.Dot),
 		LoadingSpinner: getSpinner(spinner.Points),
 		SelectedImages: mapset.NewSet[string](),
 		InProgress:     mapset.NewSet[string](),
 		PullProgress:   &sync.Map{},
 		Keys:           keys,
-		Width:          80,
-		Height:         40,
 	}
-	m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.PullSpinner, m.Width)
+	m.Table = getTable(m.Images, m.SelectedImages, m.InProgress, m.PullSpinner, m.BaseModel.Width)
 	if err != nil {
 		return m, styles.ErrorMessage(err.Error())
 	}

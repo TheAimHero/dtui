@@ -28,7 +28,7 @@ func getSpinner(spinnerStyle spinner.Spinner) spinner.Model {
 	return s
 }
 
-func getTableRows(images docker.Images, selectedRows mapset.Set[string], inProcesss mapset.Set[string], spinner spinner.Model) []table.Row {
+func getTableRows(images docker.Images, selectedRows mapset.Set[string], inProcess mapset.Set[string], spinner spinner.Model) []table.Row {
 	tableRows := []table.Row{}
 	if len(images) == 0 {
 		return tableRows
@@ -40,7 +40,7 @@ func getTableRows(images docker.Images, selectedRows mapset.Set[string], inProce
 			tag         string
 			spinnerView string
 		)
-		if inProcesss.Contains(image.ID) {
+		if inProcess.Contains(image.ID) {
 			spinnerView = spinner.View()
 		} else {
 			spinnerView = ""
@@ -51,7 +51,7 @@ func getTableRows(images docker.Images, selectedRows mapset.Set[string], inProce
 			tag = "<none>"
 		}
 		if selectedRows.Contains(image.ID) {
-			selected = " "
+			selected = "✓ "
 		}
 		tableRows = append(tableRows, table.Row{
 			selected,

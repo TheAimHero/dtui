@@ -5,8 +5,7 @@ import (
 	"strings"
 	"time"
 
-	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 )
 
 type ShowTextInput struct{}
@@ -35,30 +34,29 @@ func (m ImageModel) pullImage() string {
 }
 
 func (m ImageModel) View() string {
-	doc := strings.Builder{}
-	doc.WriteString(ui_table.Centered(m.Width).Render(m.Table.View()))
+	vb := components.NewViewBuilder(m.BaseModel.Width, m.BaseModel.Height).
+		AddCentered(m.Table.View())
+
 	if m.Input.Focused() || m.Input.Value() != "" {
-		doc.WriteString("\n" + lipgloss.NewStyle().Padding(1, 0, 0, 0).Render(m.Input.View()))
+		vb.AddPadded(m.Input.View())
 	} else {
-		doc.WriteString(strings.Repeat("\n", 2))
+		vb.AddSpacing(2)
 	}
-	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Conformation.View()))
-	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Message.ShowMessage()))
-	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Help.View(m.Keys)))
+
+	vb.AddCentered(m.Confirmation.View()).
+		AddCentered(m.Message.ShowMessage()).
+		AddCentered(m.Help.View(m.Keys))
+
 	count := 0
 	m.PullProgress.Range(func(_, _ any) bool {
 		count++
 		return false
 	})
 	if count > 0 {
-		doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.pullImage()))
+		vb.AddCentered(m.pullImage())
 	} else {
-		doc.WriteString("\n")
+		vb.AddSpacing(1)
 	}
-	padding := m.Height - lipgloss.Height(doc.String()) - 8
-	if padding < 0 {
-		padding = 0
-	}
-	doc.WriteString(strings.Repeat("\n", padding))
-	return doc.String()
+
+	return vb.Build()
 }

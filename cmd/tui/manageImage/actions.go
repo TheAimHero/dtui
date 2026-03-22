@@ -1,13 +1,24 @@
 package manageimage
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+// PullProgressMsg is sent when a pull progress update is received
+type PullProgressMsg struct {
+	ImageName string
+	Info      docker.PullProgressInfo
+}
+
+// PullCompleteMsg is sent when a pull operation completes
+type PullCompleteMsg struct {
+	ImageName string
+	Duration  time.Duration
+}
 
 const (
 	ImageStatus = iota
@@ -25,7 +36,7 @@ func deleteImage(m ImageModel) (ImageModel, tea.Cmd) {
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
 
-	err := m.DockerClient.DeleteImage(row[ImageID])
+	err := m.ImageSvc.DeleteImage(row[ImageID])
 	if err != nil {
 		m.Message.AddMessage(err.Error(), message.ErrorMessage)
 		return m, m.Message.ClearMessage(errorDuration)
@@ -40,7 +51,7 @@ func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 		return deleteImage(m)
 	}
 	for _, imageID := range m.SelectedImages.ToSlice() {
-		err := m.DockerClient.DeleteImage(imageID)
+		err := m.ImageSvc.DeleteImage(imageID)
 		if err != nil {
 			errors = append(errors, err.Error())
 		}
@@ -56,7 +67,7 @@ func (m ImageModel) DeleteImages() (ImageModel, tea.Cmd) {
 }
 
 func (m ImageModel) PruneImages() (ImageModel, tea.Cmd) {
-	err := m.DockerClient.PruneImage()
+	err := m.ImageSvc.PruneImage()
 	if err != nil {
 		m.Message.AddMessage("Error while pruning some images", message.ErrorMessage)
 		m.SelectedImages.Clear()
@@ -74,38 +85,41 @@ func (m ImageModel) PullImage() (ImageModel, tea.Cmd) {
 		m.Message.AddMessage("Image name cannot be empty", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	pullMsg := message.Message{}
-	return m, func() tea.Msg {
-		progressChan := make(chan docker.PullProgressEvent, 100)
-		doneChan := make(chan struct{})
-		go func() {
-			m.DockerClient.PullImage(imageName, progressChan)
-			close(doneChan)
-		}()
-		go func() {
-			for {
-				select {
-				case event, ok := <-progressChan:
-					if !ok {
-						return
-					}
-					m.PullProgress.Store(imageName, docker.PullProgressInfo{
-						ID:       event.ID,
-						Status:   event.Status,
-						Progress: event.Progress,
-					})
-				case <-doneChan:
-					close(progressChan)
-					return
-				}
-			}
-		}()
-		<-doneChan
-		curTime := time.Now()
-		m.PullProgress.Delete(imageName)
-		pullMsg.AddMessage(fmt.Sprintf("Image %s pulled in %s", imageName, time.Since(curTime)), message.SuccessMessage)
-		return pullMsg
+
+	progressChan := make(chan docker.PullProgressEvent, 100)
+
+	// pullCmd runs the image pull and returns PullCompleteMsg when done
+	pullCmd := func() tea.Msg {
+		startTime := time.Now()
+		m.ImageSvc.PullImage(imageName, progressChan)
+		close(progressChan)
+		return PullCompleteMsg{
+			ImageName: imageName,
+			Duration:  time.Since(startTime),
+		}
 	}
+
+	// tickCmd periodically checks for progress updates and sends PullProgressMsg
+	tickCmd := tea.Tick(time.Millisecond*100, func(t time.Time) tea.Msg {
+		select {
+		case event, ok := <-progressChan:
+			if !ok {
+				return nil
+			}
+			return PullProgressMsg{
+				ImageName: imageName,
+				Info: docker.PullProgressInfo{
+					ID:       event.ID,
+					Status:   event.Status,
+					Progress: event.Progress,
+				},
+			}
+		default:
+			return nil
+		}
+	})
+
+	return m, tea.Batch(pullCmd, tickCmd)
 }
 
 func (m ImageModel) SelectImage() (ImageModel, tea.Cmd) {

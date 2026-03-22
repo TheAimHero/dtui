@@ -1,16 +1,28 @@
 package managecontainer
 
 import (
-	"fmt"
 	"os/exec"
-	"strings"
 	"sync"
 
+	"github.com/TheAimHero/dtui/internal/docker"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
-	"github.com/docker/docker/api/types"
 )
+
+// ContainerActionResult is sent when a container action completes.
+// The Update method handles this message to update InProcess state.
+type ContainerActionResult struct {
+	ContainerID string
+	Action      ActionType
+	Err         error
+}
+
+// ContainerBatchResult aggregates all results from a batch operation.
+type ContainerBatchResult struct {
+	Results []ContainerActionResult
+	Action  ActionType
+}
 
 const (
 	ContainerSelected = iota
@@ -21,36 +33,34 @@ const (
 	ContainerStatus
 )
 
+func isValidContainerID(id string) bool {
+	return len(id) > 0 && len(id) <= 128
+}
+
 func (m *ContainerModel) ClearSelectedContainers() {
 	m.SelectedContainers.Clear()
 }
 
 func startContainer(m ContainerModel) (ContainerModel, tea.Cmd) {
-	startMsg := message.Message{}
 	row := m.Table.SelectedRow()
 	if row == nil {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	m.InProcess.Add(row[ContainerID])
+	containerID := row[ContainerID]
+	m.InProcess.Add(containerID)
 	return m, func() tea.Msg {
-		err := m.DockerClient.StartContainer(row[ContainerID])
-		if err != nil {
-			startMsg.AddMessage(fmt.Sprintf("Error while starting container: %s", strings.Split(err.Error(), ":")[1]), message.ErrorMessage)
-			return startMsg
+		err := m.ContainerSvc.StartContainer(containerID)
+		return ContainerActionResult{
+			ContainerID: containerID,
+			Action:      ActionStartContainer,
+			Err:         err,
 		}
-		startMsg.AddMessage(fmt.Sprintf("Container %s started", m.Table.SelectedRow()[ContainerName]), message.SuccessMessage)
-		m.InProcess.Remove(row[ContainerID])
-		return startMsg
 	}
 }
 
 func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
-	startMsg := message.Message{}
 	defer m.ClearSelectedContainers()
-	errors := make([]string, 0)
-	var errorsMu sync.Mutex
-	var wg sync.WaitGroup
 	if m.SelectedContainers.Cardinality() == 0 {
 		return startContainer(m)
 	}
@@ -63,59 +73,52 @@ func (m ContainerModel) StartContainers() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("No containers selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
+	// Add all to InProcess synchronously before returning
+	for _, containerID := range toStart {
+		m.InProcess.Add(containerID)
+	}
 	return m, func() tea.Msg {
-		for _, containerID := range toStart {
+		results := make([]ContainerActionResult, len(toStart))
+		var wg sync.WaitGroup
+		for i, containerID := range toStart {
 			wg.Add(1)
-			go func(containerID string) {
+			go func(i int, containerID string) {
 				defer wg.Done()
-				m.InProcess.Add(containerID)
-				err := m.DockerClient.StartContainer(containerID)
-				if err != nil {
-					errorsMu.Lock()
-					errors = append(errors, err.Error())
-					errorsMu.Unlock()
+				err := m.ContainerSvc.StartContainer(containerID)
+				results[i] = ContainerActionResult{
+					ContainerID: containerID,
+					Action:      ActionStartContainer,
+					Err:         err,
 				}
-				m.InProcess.Remove(containerID)
-			}(containerID)
+			}(i, containerID)
 		}
 		wg.Wait()
-		if len(errors) > 0 {
-			startMsg.AddMessage("Error while starting some containers", message.ErrorMessage)
-			m.SelectedContainers.Clear()
-			return startMsg
+		return ContainerBatchResult{
+			Results: results,
+			Action:  ActionStartContainer,
 		}
-		startMsg.AddMessage("Containers started", message.SuccessMessage)
-		m.SelectedContainers.Clear()
-		return startMsg
 	}
 }
 
 func stopContainer(m ContainerModel) (ContainerModel, tea.Cmd) {
-	stopMsg := message.Message{}
 	row := m.Table.SelectedRow()
 	if row == nil {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	m.InProcess.Add(row[ContainerID])
+	containerID := row[ContainerID]
+	m.InProcess.Add(containerID)
 	return m, func() tea.Msg {
-		err := m.DockerClient.StopContainer(m.Table.SelectedRow()[ContainerID])
-		if err != nil {
-			stopMsg.AddMessage(fmt.Sprintf("Error while stopping container: %s", strings.Split(err.Error(), ":")[ContainerName]), message.ErrorMessage)
-			return stopMsg
+		err := m.ContainerSvc.StopContainer(containerID)
+		return ContainerActionResult{
+			ContainerID: containerID,
+			Action:      ActionStopContainer,
+			Err:         err,
 		}
-		stopMsg.AddMessage(fmt.Sprintf("Container %s stopped", m.Table.SelectedRow()[ContainerName]), message.SuccessMessage)
-		m.InProcess.Remove(row[ContainerID])
-		return stopMsg
 	}
 }
 
 func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
-	errors := make([]string, 0)
-	var errorsMu sync.Mutex
-	var wg sync.WaitGroup
-	selectedContainers := m.SelectedContainers.ToSlice()
-	stopMsg := message.Message{}
 	if m.SelectedContainers.Cardinality() == 0 {
 		return stopContainer(m)
 	}
@@ -129,50 +132,48 @@ func (m ContainerModel) StopContainers() (ContainerModel, tea.Cmd) {
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
 	defer m.ClearSelectedContainers()
+	// Add all to InProcess synchronously before returning
+	for _, containerID := range toStop {
+		m.InProcess.Add(containerID)
+	}
 	return m, func() tea.Msg {
-		for _, containerID := range selectedContainers {
+		results := make([]ContainerActionResult, len(toStop))
+		var wg sync.WaitGroup
+		for i, containerID := range toStop {
 			wg.Add(1)
-			go func(containerID string) {
+			go func(i int, containerID string) {
 				defer wg.Done()
-				m.InProcess.Add(containerID)
-				err := m.DockerClient.StopContainer(containerID)
-				if err != nil {
-					errorsMu.Lock()
-					errors = append(errors, err.Error())
-					errorsMu.Unlock()
+				err := m.ContainerSvc.StopContainer(containerID)
+				results[i] = ContainerActionResult{
+					ContainerID: containerID,
+					Action:      ActionStopContainer,
+					Err:         err,
 				}
-				m.InProcess.Remove(containerID)
-			}(containerID)
+			}(i, containerID)
 		}
 		wg.Wait()
-		if len(errors) > 0 {
-			stopMsg.AddMessage("Error while stopping some containers", message.ErrorMessage)
-			m.SelectedContainers.Clear()
-			return stopMsg
+		return ContainerBatchResult{
+			Results: results,
+			Action:  ActionStopContainer,
 		}
-		stopMsg.AddMessage("Containers stopped", message.SuccessMessage)
-		m.SelectedContainers.Clear()
-		return stopMsg
 	}
 }
 
 func deleteContainer(m ContainerModel) (ContainerModel, tea.Cmd) {
-	deleteMsg := message.Message{}
 	row := m.Table.SelectedRow()
 	if row == nil {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
+	containerID := row[ContainerID]
+	m.InProcess.Add(containerID)
 	return m, func() tea.Msg {
-		m.InProcess.Add(row[ContainerID])
-		err := m.DockerClient.DeleteContainer(row[ContainerID])
-		if err != nil {
-			deleteMsg.AddMessage(fmt.Sprintf("Error while deleting container: %s", strings.Split(err.Error(), ":")[ContainerName]), message.ErrorMessage)
-			return deleteMsg
+		err := m.ContainerSvc.DeleteContainer(containerID)
+		return ContainerActionResult{
+			ContainerID: containerID,
+			Action:      ActionDeleteContainer,
+			Err:         err,
 		}
-		deleteMsg.AddMessage(fmt.Sprintf("Container %s deleted", m.Table.SelectedRow()[ContainerName]), message.SuccessMessage)
-		m.InProcess.Remove(row[ContainerID])
-		return deleteMsg
 	}
 }
 
@@ -191,34 +192,30 @@ func (m ContainerModel) DeleteContainers() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("No containers selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	deleteMsg := message.Message{}
-	errors := make([]string, 0)
-	var errorsMu sync.Mutex
-	var wg sync.WaitGroup
+	// Add all to InProcess synchronously before returning
+	for _, containerID := range toDelete {
+		m.InProcess.Add(containerID)
+	}
 	return m, func() tea.Msg {
-		for _, containerID := range toDelete {
+		results := make([]ContainerActionResult, len(toDelete))
+		var wg sync.WaitGroup
+		for i, containerID := range toDelete {
 			wg.Add(1)
-			go func(containerID string) {
+			go func(i int, containerID string) {
 				defer wg.Done()
-				m.InProcess.Add(containerID)
-				err := m.DockerClient.DeleteContainer(containerID)
-				if err != nil {
-					errorsMu.Lock()
-					errors = append(errors, err.Error())
-					errorsMu.Unlock()
+				err := m.ContainerSvc.DeleteContainer(containerID)
+				results[i] = ContainerActionResult{
+					ContainerID: containerID,
+					Action:      ActionDeleteContainer,
+					Err:         err,
 				}
-				m.InProcess.Remove(containerID)
-			}(containerID)
+			}(i, containerID)
 		}
 		wg.Wait()
-		if len(errors) > 0 {
-			deleteMsg.AddMessage("Error while deleting some containers", message.ErrorMessage)
-			m.SelectedContainers.Clear()
-			return deleteMsg
+		return ContainerBatchResult{
+			Results: results,
+			Action:  ActionDeleteContainer,
 		}
-		m.SelectedContainers.Clear()
-		deleteMsg.AddMessage("Containers deleted", message.SuccessMessage)
-		return deleteMsg
 	}
 }
 
@@ -263,8 +260,8 @@ func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	var container types.Container
-	for _, c := range m.DockerClient.Containers {
+	var container docker.Container
+	for _, c := range m.Containers {
 		if c.ID == containerID {
 			container = c
 			break
@@ -274,8 +271,11 @@ func (m ContainerModel) ExecContainer() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("Container is not running", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	// @hack: ignore security check
-	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh") // #nosec
+	if !isValidContainerID(containerID) {
+		m.Message.AddMessage("Invalid container ID", message.ErrorMessage)
+		return m, m.Message.ClearMessage(message.ErrorDuration)
+	}
+	c := exec.Command("docker", "container", "exec", "-it", containerID, "sh")
 	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }
 
@@ -290,7 +290,10 @@ func (m ContainerModel) ShowLogs() (ContainerModel, tea.Cmd) {
 		m.Message.AddMessage("No container selected", message.InfoMessage)
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
-	// @hack: ignore security check
-	c := exec.Command("docker", "logs", containerID, "--follow") // #nosec
+	if !isValidContainerID(containerID) {
+		m.Message.AddMessage("Invalid container ID", message.ErrorMessage)
+		return m, m.Message.ClearMessage(message.ErrorDuration)
+	}
+	c := exec.Command("docker", "logs", containerID, "--follow")
 	return m, tea.ExecProcess(c, func(err error) tea.Msg { return tea.ClearScreen })
 }

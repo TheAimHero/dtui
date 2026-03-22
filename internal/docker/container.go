@@ -9,15 +9,18 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (m *DockerClient) FetchContainers() error {
+func (m *DockerClient) FetchContainers() (Containers, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	containers, err := m.client.ContainerList(ctx, container.ListOptions{All: true})
-	m.Containers = containers
 	if err != nil {
-		return fmt.Errorf("failed to fetch containers: %w", err)
+		return nil, fmt.Errorf("failed to fetch containers: %w", err)
 	}
-	return nil
+	result := make(Containers, len(containers))
+	for i, c := range containers {
+		result[i] = ContainerFromAPI(c)
+	}
+	return result, nil
 }
 
 func (m *DockerClient) StopContainer(containerID string) error {

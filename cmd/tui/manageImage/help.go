@@ -1,15 +1,9 @@
 package manageimage
 
 import (
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	descStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1FA8C"))
-	ellipsisStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#6272a4"))
-	keyStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("#BD93F9"))
 )
 
 type keyMap struct {
@@ -44,30 +38,12 @@ func (k keyMap) FullHelp() [][]key.Binding {
 }
 
 var keys = keyMap{
-	Up: key.NewBinding(
-		key.WithKeys("up", "k"),
-		key.WithHelp("↑/k", "move up"),
-	),
-	Down: key.NewBinding(
-		key.WithKeys("down", "j"),
-		key.WithHelp("↓/j", "move down"),
-	),
-	Left: key.NewBinding(
-		key.WithKeys("left", "h"),
-		key.WithHelp("←/h", "move left"),
-	),
-	Right: key.NewBinding(
-		key.WithKeys("right", "l"),
-		key.WithHelp("→/l", "move right"),
-	),
-	Help: key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "toggle help"),
-	),
-	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
-		key.WithHelp("q", "quit"),
-	),
+	Up:    components.NewNavigationKeys().Up,
+	Down:  components.NewNavigationKeys().Down,
+	Left:  components.NewNavigationKeys().Left,
+	Right: components.NewNavigationKeys().Right,
+	Help:  components.NewNavigationKeys().Help,
+	Quit:  components.NewNavigationKeys().Quit,
 	SelectImage: key.NewBinding(
 		key.WithKeys(" "),
 		key.WithHelp("space", "select image"),
@@ -101,15 +77,5 @@ var keys = keyMap{
 }
 
 func getHelpSection() help.Model {
-	m := help.New()
-	s := m.Styles
-	s.ShortDesc = descStyle
-	s.FullDesc = descStyle
-	s.FullKey = keyStyle
-	s.ShortKey = keyStyle
-	s.Ellipsis = ellipsisStyle
-	s.FullSeparator = ellipsisStyle
-	s.ShortSeparator = ellipsisStyle
-	m.Styles = s
-	return m
+	return components.NewDefaultHelpModel()
 }

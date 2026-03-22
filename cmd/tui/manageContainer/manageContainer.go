@@ -1,58 +1,46 @@
 package managecontainer
 
 import (
-	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/spinner"
-	"github.com/charmbracelet/bubbles/table"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
 type ContainerModel struct {
-	Help               help.Model
+	*components.BaseModel
+	ContainerSvc       docker.ContainerService
+	Containers         docker.Containers
 	SelectedContainers mapset.Set[string]
 	InProcess          mapset.Set[string]
-	Keys               keyMap
-	DockerClient       docker.DockerClient
 	Confirmation       prompt.Model
 	Message            message.Message
-	Input              textinput.Model
-	Spinner            spinner.Model
-	Table              table.Model
-	Width              int
-	Height             int
+	containerKeys      keyMap
 }
 
 func (m ContainerModel) Init() tea.Cmd {
 	return tea.Batch(utils.TickCommand(), m.Spinner.Tick)
 }
 
-func NewModel(dockerClient docker.DockerClient) (ContainerModel, error) {
-	err := dockerClient.FetchContainers()
-	spinner := getSpinner()
-	help := getHelpSection()
-	input := getInput()
+func NewModel(containerSvc docker.ContainerService) (ContainerModel, error) {
+	containers, err := containerSvc.FetchContainers()
+	if err != nil {
+		return ContainerModel{}, err
+	}
+	base := components.NewBaseModel(80, 40)
 	m := ContainerModel{
-		DockerClient:       dockerClient,
-		Help:               help,
-		Spinner:            spinner,
+		BaseModel:          &base,
+		ContainerSvc:       containerSvc,
+		Containers:         containers,
 		SelectedContainers: mapset.NewSet[string](),
 		InProcess:          mapset.NewSet[string](),
 		Message:            message.Message{},
-		Keys:               keys,
-		Input:              input,
-		Width:              80,
-		Height:             40,
+		containerKeys:      keys,
 	}
 	m.Table = m.getTable()
-	if err != nil {
-		return m, err
-	}
 	return m, nil
 }

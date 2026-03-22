@@ -1,8 +1,10 @@
 package manageimage
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
@@ -38,7 +40,7 @@ func (m ImageModel) updateInput(msg tea.KeyMsg) (ImageModel, tea.Cmd) {
 		m.Keys.ShowInput.SetEnabled(true)
 		m.Keys.EscapeInput.SetEnabled(false)
 		m.Keys.Submit.SetEnabled(false)
-		m.Conformation = prompt.NewModel("Are you sure you want to pull image", func() tea.Msg { return ActionPullImage })
+		m.Confirmation = prompt.NewModel("Are you sure you want to pull image", func() tea.Msg { return ActionPullImage })
 		return m, tea.Batch(cmd)
 
 	default:
@@ -68,29 +70,32 @@ func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		m.Width = msg.Width
-		m.Height = msg.Height
-		m.Table = getTable(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.LoadingSpinner, m.Width)
-		maxTableHeight := (m.Height * 50) / 100
-		tableHeight := m.Height - 14
-		if tableHeight < 5 {
-			tableHeight = 5
-		}
-		if tableHeight > maxTableHeight {
-			tableHeight = maxTableHeight
-		}
+		m.BaseModel.Width = msg.Width
+		m.BaseModel.Height = msg.Height
+		m.Table = getTable(m.Images, m.SelectedImages, m.InProgress, m.LoadingSpinner, m.BaseModel.Width)
+		tableConfig := components.DefaultTableConfig().WithOffset(14)
+		tableHeight := components.CalculateTableHeight(m.BaseModel.Height, tableConfig)
 		m.Table.SetHeight(tableHeight)
+
+	case PullProgressMsg:
+		m.PullProgress.Store(msg.ImageName, msg.Info)
+
+	case PullCompleteMsg:
+		m.PullProgress.Delete(msg.ImageName)
+		m.Message.AddMessage(fmt.Sprintf("Image %s pulled in %s", msg.ImageName, msg.Duration), message.SuccessMessage)
+		cmds = append(cmds, m.Message.ClearMessage(message.SuccessDuration))
 
 	case message.ClearMessage:
 		m.Message = message.Message{}
 
 	case time.Time:
-		err := m.DockerClient.FetchImages()
+		var err error
+		m.Images, err = m.ImageSvc.FetchImages()
 		if err != nil {
 			m.Message.AddMessage("Error while fetching images", message.ErrorMessage)
 			cmds = append(cmds, utils.TickCommand(), m.Message.ClearMessage(message.ErrorDuration))
 		}
-		tableRows := getTableRows(m.DockerClient.Images, m.SelectedImages, m.InProgress, m.LoadingSpinner)
+		tableRows := getTableRows(m.Images, m.SelectedImages, m.InProgress, m.LoadingSpinner)
 		m.Table.SetRows(tableRows)
 		cmds = append(cmds, utils.TickCommand())
 
@@ -111,8 +116,8 @@ func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.Input.Focused() {
 			return m.updateInput(msg)
 		}
-		if m.Conformation.Active {
-			m.Conformation, cmd = m.Conformation.Update(msg)
+		if m.Confirmation.Active {
+			m.Confirmation, cmd = m.Confirmation.Update(msg)
 			cmds = append(cmds, cmd)
 			return m, tea.Batch(cmds...)
 		}
@@ -132,10 +137,10 @@ func (m ImageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmds = append(cmds, cmd)
 
 		case key.Matches(msg, m.Keys.DeleteImages):
-			m.Conformation = prompt.NewModel("Are you sure you want to delete these images?", func() tea.Msg { return ActionDeleteImage })
+			m.Confirmation = prompt.NewModel("Are you sure you want to delete these images?", func() tea.Msg { return ActionDeleteImage })
 
 		case key.Matches(msg, m.Keys.PruneImages):
-			m.Conformation = prompt.NewModel("Are you sure you want to prune these images?", func() tea.Msg { return ActionPruneImage })
+			m.Confirmation = prompt.NewModel("Are you sure you want to prune these images?", func() tea.Msg { return ActionPruneImage })
 
 		case key.Matches(msg, m.Keys.ShowInput):
 			m.Input = getInput()

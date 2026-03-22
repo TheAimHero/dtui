@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	physicalWidth, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd())) // nolint:unused
+	_, physicalHeight, _ = term.GetSize(int(os.Stdout.Fd()))
 )
 
 func HeightPadding(doc strings.Builder, fixHeight int) int {

@@ -19,9 +19,9 @@ tasks:
 
   lint:
     cmds:
-      - go vet ./... 
+      - go vet ./...
       - golangci-lint run -v
 
-  format: 
+  format:
     cmds:
       - gofmt -l -w .

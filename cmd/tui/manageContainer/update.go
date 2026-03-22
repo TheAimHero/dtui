@@ -1,8 +1,10 @@
 package managecontainer
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/ui/message"
 	"github.com/TheAimHero/dtui/internal/ui/prompt"
 	"github.com/TheAimHero/dtui/internal/utils"
@@ -20,6 +22,30 @@ const (
 	ActionDeleteContainer
 )
 
+func actionVerb(action ActionType) string {
+	switch action {
+	case ActionStartContainer:
+		return "starting"
+	case ActionStopContainer:
+		return "stopping"
+	case ActionDeleteContainer:
+		return "deleting"
+	}
+	return ""
+}
+
+func actionVerbPast(action ActionType) string {
+	switch action {
+	case ActionStartContainer:
+		return "started"
+	case ActionStopContainer:
+		return "stopped"
+	case ActionDeleteContainer:
+		return "deleted"
+	}
+	return ""
+}
+
 func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 	var cmd tea.Cmd
 
@@ -28,18 +54,18 @@ func (m ContainerModel) updateInput(msg tea.KeyMsg) (ContainerModel, tea.Cmd) {
 		m.Table.Focus()
 		m.Input = textinput.Model{}
 		m.Table, cmd = m.Table.Update(msg)
-		m.Keys.ShowInput.SetEnabled(true)
-		m.Keys.EscapeInput.SetEnabled(false)
-		m.Keys.SetFilter.SetEnabled(false)
+		m.containerKeys.ShowInput.SetEnabled(true)
+		m.containerKeys.EscapeInput.SetEnabled(false)
+		m.containerKeys.SetFilter.SetEnabled(false)
 		return m, cmd
 
 	case "enter":
 		m.Table.Focus()
 		m.Input.Blur()
-		m.Keys.ShowInput.SetEnabled(true)
-		m.Keys.EscapeInput.SetEnabled(false)
-		m.Keys.SetFilter.SetEnabled(false)
-		m.Keys.ShowLogs.SetEnabled(true)
+		m.containerKeys.ShowInput.SetEnabled(true)
+		m.containerKeys.EscapeInput.SetEnabled(false)
+		m.containerKeys.SetFilter.SetEnabled(false)
+		m.containerKeys.ShowLogs.SetEnabled(true)
 		return m, cmd
 
 	default:
@@ -73,14 +99,8 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.Width = msg.Width
 		m.Height = msg.Height
-		maxTableHeight := (m.Height * 50) / 100
-		tableHeight := m.Height - 12
-		if tableHeight < 5 {
-			tableHeight = 5
-		}
-		if tableHeight > maxTableHeight {
-			tableHeight = maxTableHeight
-		}
+		tableConfig := components.DefaultTableConfig().WithOffset(12)
+		tableHeight := components.CalculateTableHeight(m.Height, tableConfig)
 		m.Table = m.getTable()
 		m.Table.SetHeight(tableHeight)
 
@@ -97,14 +117,45 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		cmds = append(cmds, m.Message.ClearMessage(duration))
 
+	case ContainerActionResult:
+		m.InProcess.Remove(msg.ContainerID)
+		if msg.Err != nil {
+			m.Message.AddMessage(fmt.Sprintf("Error while %s container: %s", actionVerb(msg.Action), msg.Err.Error()), message.ErrorMessage)
+			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration))
+		} else {
+			m.Message.AddMessage(fmt.Sprintf("Container %s %s", msg.ContainerID, actionVerbPast(msg.Action)), message.SuccessMessage)
+			cmds = append(cmds, m.Message.ClearMessage(message.SuccessDuration))
+		}
+
+	case ContainerBatchResult:
+		for _, result := range msg.Results {
+			m.InProcess.Remove(result.ContainerID)
+		}
+		hasErrors := false
+		for _, result := range msg.Results {
+			if result.Err != nil {
+				hasErrors = true
+				break
+			}
+		}
+		if hasErrors {
+			m.Message.AddMessage(fmt.Sprintf("Error while %s some containers", actionVerb(msg.Action)), message.ErrorMessage)
+			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration))
+		} else {
+			m.Message.AddMessage(fmt.Sprintf("Containers %s", actionVerbPast(msg.Action)), message.SuccessMessage)
+			cmds = append(cmds, m.Message.ClearMessage(message.SuccessDuration))
+		}
+
 	case time.Time:
-		err := m.DockerClient.FetchContainers()
+		containers, err := m.ContainerSvc.FetchContainers()
 		if err != nil {
 			m.Message.AddMessage("Error while fetching containers", message.ErrorMessage)
 			cmds = append(cmds, m.Message.ClearMessage(message.ErrorDuration), utils.TickCommand())
+		} else {
+			m.Containers = containers
 		}
 		tableRows := getTableRows(
-			m.DockerClient.Containers,
+			m.Containers,
 			m.SelectedContainers,
 			m.InProcess,
 			m.Spinner,
@@ -132,37 +183,37 @@ func (m ContainerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.Keys.Help):
 			m.Help.ShowAll = !m.Help.ShowAll
 
-		case key.Matches(msg, m.Keys.StartContainers):
+		case key.Matches(msg, m.containerKeys.StartContainers):
 			m.Confirmation = prompt.NewModel("Are you sure you want to start selected containers?", func() tea.Msg { return ActionStartContainer })
 
-		case key.Matches(msg, m.Keys.StopContainers):
+		case key.Matches(msg, m.containerKeys.StopContainers):
 			m.Confirmation = prompt.NewModel("Are you sure you want to stop selected containers?", func() tea.Msg { return ActionStopContainer })
 
-		case key.Matches(msg, m.Keys.ToggleSelected):
+		case key.Matches(msg, m.containerKeys.ToggleSelected):
 			m, cmd = m.SelectContainers()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.Keys.ToggleSelectAll):
+		case key.Matches(msg, m.containerKeys.ToggleSelectAll):
 			m, cmd = m.SelectAllContainers()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.Keys.DeleteContainers):
+		case key.Matches(msg, m.containerKeys.DeleteContainers):
 			m.Confirmation = prompt.NewModel("Are you sure you want to delete selected containers?", func() tea.Msg { return ActionDeleteContainer })
 
-		case key.Matches(msg, m.Keys.ShowLogs):
+		case key.Matches(msg, m.containerKeys.ShowLogs):
 			m, cmd = m.ShowLogs()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.Keys.ExecContainer):
+		case key.Matches(msg, m.containerKeys.ExecContainer):
 			m, cmd = m.ExecContainer()
 			cmds = append(cmds, cmd)
 
-		case key.Matches(msg, m.Keys.ShowInput):
+		case key.Matches(msg, m.containerKeys.ShowInput):
 			m.Input = getInput()
-			m.Keys.ShowInput.SetEnabled(false)
-			m.Keys.ShowLogs.SetEnabled(false)
-			m.Keys.EscapeInput.SetEnabled(true)
-			m.Keys.SetFilter.SetEnabled(true)
+			m.containerKeys.ShowInput.SetEnabled(false)
+			m.containerKeys.ShowLogs.SetEnabled(false)
+			m.containerKeys.EscapeInput.SetEnabled(true)
+			m.containerKeys.SetFilter.SetEnabled(true)
 			cmds = append(cmds, m.Input.Focus())
 		}
 	}

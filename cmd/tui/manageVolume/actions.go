@@ -6,7 +6,9 @@ import (
 )
 
 const (
-	VolumeName = iota
+	VolumeSelect = iota
+	VolumeLoading
+	VolumeName
 	VolumeCreated
 	VolumeMountpoint
 	VolumeSize
@@ -20,7 +22,7 @@ func (m VolumeModel) PruneVolume() (VolumeModel, tea.Cmd) {
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
 	return m, func() tea.Msg {
-		err := m.DockerClient.PruneVolume()
+		err := m.VolumeSvc.PruneVolume()
 		if err != nil {
 			deleteMsg.AddMessage("Error while pruning volumes", message.ErrorMessage)
 			return deleteMsg
@@ -39,7 +41,7 @@ func (m VolumeModel) DeleteVolume() (VolumeModel, tea.Cmd) {
 		return m, m.Message.ClearMessage(message.InfoDuration)
 	}
 	return m, func() tea.Msg {
-		err := m.DockerClient.DeleteVolume(row[VolumeName], false)
+		err := m.VolumeSvc.DeleteVolume(row[VolumeName], false)
 		if err != nil {
 			deleteMsg.AddMessage("Error while deleting volume", message.ErrorMessage)
 			return deleteMsg

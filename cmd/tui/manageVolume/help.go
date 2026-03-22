@@ -1,15 +1,9 @@
 package managevolume
 
 import (
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	descStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#F1FA8C"))
-	ellipsisStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#6272a4"))
-	keyStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("#BD93F9"))
 )
 
 type keyMap struct {
@@ -19,6 +13,9 @@ type keyMap struct {
 	Right        key.Binding
 	Help         key.Binding
 	Quit         key.Binding
+	ShowInput    key.Binding
+	EscapeInput  key.Binding
+	SetFilter    key.Binding
 	PruneVolume  key.Binding
 	DeleteVolume key.Binding
 }
@@ -32,34 +29,31 @@ func (k keyMap) FullHelp() [][]key.Binding {
 		{k.Help, k.Quit},
 		{k.Up, k.Down},
 		{k.Left, k.Right},
+		{k.ShowInput, k.EscapeInput, k.SetFilter},
 		{k.PruneVolume, k.DeleteVolume},
 	}
 }
 
 var keys = keyMap{
-	Up: key.NewBinding(
-		key.WithKeys("up", "k"),
-		key.WithHelp("↑/k", "move up"),
+	Up:    components.NewNavigationKeys().Up,
+	Down:  components.NewNavigationKeys().Down,
+	Left:  components.NewNavigationKeys().Left,
+	Right: components.NewNavigationKeys().Right,
+	Help:  components.NewNavigationKeys().Help,
+	Quit:  components.NewNavigationKeys().Quit,
+	ShowInput: key.NewBinding(
+		key.WithKeys("/"),
+		key.WithHelp("/", "filter"),
 	),
-	Down: key.NewBinding(
-		key.WithKeys("down", "j"),
-		key.WithHelp("↓/j", "move down"),
+	EscapeInput: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "clear filter"),
+		key.WithDisabled(),
 	),
-	Left: key.NewBinding(
-		key.WithKeys("left", "h"),
-		key.WithHelp("←/h", "move left"),
-	),
-	Right: key.NewBinding(
-		key.WithKeys("right", "l"),
-		key.WithHelp("→/l", "move right"),
-	),
-	Help: key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "toggle help"),
-	),
-	Quit: key.NewBinding(
-		key.WithKeys("q", "ctrl+c"),
-		key.WithHelp("q", "quit"),
+	SetFilter: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "apply filter"),
+		key.WithDisabled(),
 	),
 	PruneVolume: key.NewBinding(
 		key.WithKeys("p"),
@@ -72,15 +66,5 @@ var keys = keyMap{
 }
 
 func getHelpSection() help.Model {
-	m := help.New()
-	s := m.Styles
-	s.ShortDesc = descStyle
-	s.FullDesc = descStyle
-	s.FullKey = keyStyle
-	s.ShortKey = keyStyle
-	s.Ellipsis = ellipsisStyle
-	s.FullSeparator = ellipsisStyle
-	s.ShortSeparator = ellipsisStyle
-	m.Styles = s
-	return m
+	return components.NewDefaultHelpModel()
 }

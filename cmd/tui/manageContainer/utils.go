@@ -10,7 +10,7 @@ import (
 	mapset "github.com/deckarep/golang-set/v2"
 
 	"github.com/TheAimHero/dtui/internal/docker"
-	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 	"github.com/TheAimHero/dtui/internal/utils"
 )
 
@@ -27,17 +27,17 @@ func filterRows(rows []table.Row, filter string) []table.Row {
 	return filteredRows
 }
 
-func getTableRows(containers docker.Containers, selectedContainers mapset.Set[string], inProcesss mapset.Set[string], spinner spinner.Model) []table.Row {
+func getTableRows(containers docker.Containers, selectedContainers mapset.Set[string], inProcess mapset.Set[string], spinner spinner.Model) []table.Row {
 	tableRows := []table.Row{}
 	for _, container := range containers {
 		var selected string
 		var spinnerView string
 		if selectedContainers.Contains(container.ID) {
-			selected = " "
+			selected = "✓ "
 		} else {
 			selected = "  "
 		}
-		if inProcesss.Contains(container.ID) {
+		if inProcess.Contains(container.ID) {
 			spinnerView = spinner.View()
 		} else {
 			spinnerView = ""
@@ -68,13 +68,12 @@ func getTableColumns(width int) []table.Column {
 func (m ContainerModel) getTable() table.Model {
 	tableColumns := getTableColumns(m.Width)
 	tableRows := getTableRows(
-		m.DockerClient.Containers,
+		m.Containers,
 		m.SelectedContainers,
 		m.InProcess,
 		m.Spinner,
 	)
-	table := ui_table.NewTable(tableColumns, tableRows)
-	return table
+	return components.NewStandardTable(tableColumns, tableRows)
 }
 
 func getSpinner() spinner.Model {

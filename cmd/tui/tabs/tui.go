@@ -12,7 +12,9 @@ import (
 
 type MainModel struct {
 	WipTab       wip.WipModel
-	DockerClient docker.DockerClient
+	ContainerSvc docker.ContainerService
+	ImageSvc     docker.ImageService
+	VolumeSvc    docker.VolumeService
 	TabsTitle    []string
 	Tabs         []tea.Model
 	ActiveTab    int
@@ -28,16 +30,16 @@ func (m MainModel) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func NewModel(dockerClient docker.DockerClient) (tea.Model, error) {
-	containerModel, err := managecontainer.NewModel(dockerClient)
+func NewModel(containerSvc docker.ContainerService, imageSvc docker.ImageService, volumeSvc docker.VolumeService) (tea.Model, error) {
+	containerModel, err := managecontainer.NewModel(containerSvc)
 	if err != nil {
 		return nil, styles.ErrorMessage(err.Error())
 	}
-	imageModel, err := manageimage.NewModel(dockerClient)
+	imageModel, err := manageimage.NewModel(imageSvc)
 	if err != nil {
 		return nil, styles.ErrorMessage(err.Error())
 	}
-	volumeModel, err := managevolume.NewModel(dockerClient)
+	volumeModel, err := managevolume.NewModel(volumeSvc)
 	if err != nil {
 		return nil, styles.ErrorMessage(err.Error())
 	}
@@ -45,7 +47,9 @@ func NewModel(dockerClient docker.DockerClient) (tea.Model, error) {
 	model := MainModel{
 		TabsTitle:    []string{"Manage Container", "Manage Images", "Manage Volumes", "Work In Progress"},
 		Tabs:         []tea.Model{&containerModel, &imageModel, &volumeModel, &wipModel},
-		DockerClient: dockerClient,
+		ContainerSvc: containerSvc,
+		ImageSvc:     imageSvc,
+		VolumeSvc:    volumeSvc,
 		ActiveTab:    0,
 		Width:        80,
 		Height:       40,
@@ -58,13 +62,11 @@ func NewTui() error {
 	if err != nil {
 		return err
 	}
-	model, err := NewModel(dockerClient)
+	model, err := NewModel(&dockerClient, &dockerClient, &dockerClient)
 	if err != nil {
 		return err
 	}
 	_, err = tea.NewProgram(model, tea.WithAltScreen(), tea.WithMouseCellMotion()).Run()
-	// for dev purpose
-	// _, err = tea.NewProgram(model).Run()
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/TheAimHero/dtui/cmd/tui/tabs"
 )
@@ -9,6 +10,7 @@ import (
 func main() {
 	err := tabs.NewTui()
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
 }

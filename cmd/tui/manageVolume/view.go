@@ -1,22 +1,15 @@
 package managevolume
 
 import (
-	"strings"
-
-	ui_table "github.com/TheAimHero/dtui/internal/ui/table"
-	"github.com/charmbracelet/lipgloss"
+	"github.com/TheAimHero/dtui/internal/ui/components"
 )
 
 func (m VolumeModel) View() string {
-	doc := strings.Builder{}
-	doc.WriteString(ui_table.Centered(m.Width).Render(m.Table.View()))
-	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Confirmation.View()))
-	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Message.ShowMessage()))
-	doc.WriteString("\n" + ui_table.Centered(m.Width).Render(m.Help.View(m.Keys)))
-	padding := m.Height - lipgloss.Height(doc.String()) - 8
-	if padding < 0 {
-		padding = 0
-	}
-	doc.WriteString(strings.Repeat("\n", padding))
-	return doc.String()
+	vb := components.NewViewBuilder(m.Width, m.Height).
+		AddCentered(m.Table.View()).
+		AddCentered(m.Confirmation.View()).
+		AddCentered(m.Message.ShowMessage()).
+		AddCentered(m.Help.View(m.Keys))
+
+	return vb.Build()
 }
